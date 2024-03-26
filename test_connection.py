@@ -1,9 +1,7 @@
 import psycopg2
 import psycopg2.extras
 from flask import Flask, jsonify
-import numpy as np
-
-DATABASE_URL = "dbname='initTest' user='postgres' host='192.168.1.67' password='44krn44' port='5432'"
+from config import DATABASE_URL
 
 try:
     # Attempt to establish a connection to the database
