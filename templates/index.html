@@ -8,35 +8,34 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
+    <style>
+        body {
+            background-color: black;
+        }
+        /* Add the rest of the CSS from the block content */
+    </style>
 </head>
 <body>
-
-    {% if 'user_id' not in session %}
-    <div id = "inner">
-        <div class="text-center">
-            <h2>Welcome to Our App</h2>
-            <p>Connect and manage your data efficiently</p>
-
-            <!-- Database Connection Status -->
-            <div class="db-status mb-4">
-                {% if db_status == 'up' %}
-                    <span class="dot" style="height: 25px; width: 25px; background-color: #4CAF50; border-radius: 50%; display: inline-block;"></span>
-                    <span>Database is up. Tables: {{ tables|join(', ') }}</span>
-                {% else %}
-                    <span class="dot" style="height: 25px; width: 25px; background-color: #f44336; border-radius: 50%; display: inline-block;"></span>
-                    <span>Failed to connect to the database.</span>
-                {% endif %}
+{% if 'user_id' not in session %}
+<div class="container">
+    <h1 style="color: white;">Welcome to Our App</h1>
+    <!-- Login Form -->
+    <div>
+        <h2>Login</h2>
+        <form action="/login" method="post">
+            <div class="form-group">
+                <label for="loginName" style="color: white;">Username:</label>
+                <input type="text" class="form-control" id="loginName" name="name" required>
             </div>
-
-            <!-- Trigger modal buttons -->
-            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
-                Login
-            </button>
-            <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#registerModal">
-                Register
-            </button>
-        </div>
+            <div class="form-group">
+                <label for="loginPassword" style="color: white;">Password:</label>
+                <input type="password" class="form-control" id="loginPassword" name="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+        </form>
+        <p>Don't have an account? <a href="/register" style="color: rgba(224, 133, 121);">Register</a></p>
     </div>
+</div>
     {% else %}
         <div id = "outer">
             <header class="header order-last" id="tm-header">
