@@ -160,12 +160,16 @@ def get_users():
 
 @app.route('/weights', methods=['GET'])
 def get_weights():
+    if 'user_id' not in session:
+        # Redirect to login page if user is not logged in
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
     conn = psycopg2.connect(DATABASE_URL)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    cur.execute('SELECT * FROM weights')
+    # Modify the query to filter weights by the logged-in user's ID
+    cur.execute('SELECT * FROM weights WHERE user_id = %s ORDER BY date_of_measurement DESC', (user_id,))
     weights = cur.fetchall()
-
     cur.close()
     conn.close()
 
