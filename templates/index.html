@@ -1,24 +1,37 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Flask App</title>
+    <meta charset="utf-8" />
+    <title>App Interface</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
 </head>
 <body>
-    <h1>Welcome to the Flask App</h1>
-    <form action="/test" method="get">
-        <button type="submit">Test Database Connection</button>
-    </form>
-    <form action="/users" method="get">
-        <button type="submit">Get Users</button>
-    </form>
-    <h2>Add a new user</h2>
-    <form action="/add_user" method="post">
-        <label for="username">Username:</label>
-        <input type="text" id="username" name="username" required>
-        <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required>
-        <button type="submit">Add User</button>
-    </form>
+    <div id="outer">
+        <header class="header order-last" id="tm-header">
+            <nav class="navbar">
+                <div class="collapse navbar-collapse single-page-nav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="/test"><span class="icn"><i class="fas fa-2x fa-database"></i></span> Test Connection</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/add_user_form"><span class="icn"><i class="fas fa-2x fa-user-plus"></i></span> Add User</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/users"><span class="icn"><i class="fas fa-2x fa-users"></i></span> Get Users</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+    </div>
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/slick.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/templatemo-script.js') }}"></script>
 </body>
 </html>

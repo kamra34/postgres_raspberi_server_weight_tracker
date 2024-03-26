@@ -3,7 +3,6 @@ import psycopg2
 import psycopg2.extras
 import os
 from dotenv import load_dotenv
-import secrets
 
 
 app = Flask(__name__)
@@ -29,23 +28,9 @@ def test_connection():
         # Attempt to establish a connection to the database
         conn = psycopg2.connect(DATABASE_URL)
         conn.close()
-        return "Successfully connected to the database!"
+        return render_template("test_connection.html")
     except Exception as e:
-        return f"An error occurred: {e}"
-
-
-@app.route('/users', methods=['GET'])
-def get_users():
-    conn = psycopg2.connect(DATABASE_URL)
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    
-    cur.execute('SELECT * FROM users')
-    users = cur.fetchall()
-
-    cur.close()
-    conn.close()
-
-    return jsonify([dict(user) for user in users])
+        return f"An error occurred: {e}"    
 
 @app.route('/add_user', methods=['POST'])
 def add_user():
@@ -68,9 +53,23 @@ def add_user():
         cur.close()
         conn.close()
 
-    # Redirect back to the home page after inserting the data
-    return redirect(url_for('home'))
+@app.route('/add_user_form', methods=['GET'])
+def add_user_form():
+    return render_template("add_user.html")  # Ensure you create add_user.html
 
+
+@app.route('/users', methods=['GET'])
+def get_users():
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    cur.execute('SELECT * FROM users')
+    users = cur.fetchall()
+
+    cur.close()
+    conn.close()
+
+    return render_template("get_users.html", users=users)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
