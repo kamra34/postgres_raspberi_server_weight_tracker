@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Weight</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Add Weight</h1>
+        <form action="/add_weight" method="post">
+            <div class="form-group">
+                <label for="date_of_measurement">Date of Measurement:</label>
+                <input type="date" id="date_of_measurement" name="date_of_measurement" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="weight">Weight:</label>
+                <input type="number" step="0.01" id="weight" name="weight" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </form>
+        <a href="/" class="btn btn-secondary">Go Back</a>
+    </div>
+</body>
+</html>
