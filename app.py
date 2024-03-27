@@ -225,6 +225,50 @@ def update_weight(weight_id):
 
     return {'success': 'Weight updated successfully'}, 200
 
+@app.route('/personal_details', methods=['GET', 'POST'])
+def personal_details():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    
+    if request.method == 'POST':
+        # Extract form data
+        dob = request.form.get('dob')
+        sex = request.form.get('sex')
+        activity_level = request.form.get('activity_level')
+        height = request.form.get('height')
+        
+        # Update database
+        try:
+            conn = psycopg2.connect(DATABASE_URL)
+            cur = conn.cursor()
+            cur.execute("""
+                UPDATE users SET date_of_birth = %s, sex = %s, activity_level = %s, height = %s
+                WHERE id = %s
+                """, (dob, sex, activity_level, height, user_id))
+            conn.commit()
+            cur.close()
+            conn.close()
+            flash('Details updated successfully', 'success')
+        except Exception as e:
+            flash(f'An error occurred: {e}', 'error')
+    
+    # Fetch current user details to prefill the form
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT date_of_birth, sex, activity_level, height FROM users WHERE id = %s", (user_id,))
+        user_details = cur.fetchone()
+        cur.close()
+        conn.close()
+    except Exception as e:
+        user_details = None
+        flash(f'An error occurred while fetching user details: {e}', 'error')
+    
+    return render_template('personal_details.html', user_details=user_details)
+
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)

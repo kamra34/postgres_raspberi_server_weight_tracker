@@ -10,8 +10,23 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .bg-image {
+            background-image: url("{{ url_for('static', filename='img/weight_tracker.jpg') }}");
+            height: 100vh;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
+    </style>
 </head>
 <body>
+<div class="bg-image">
 <div id = "outer" class="container">
     <div class="alert alert-success" role="alert">
         Welcome, {{ user_name }}!
@@ -21,10 +36,10 @@
             <div class= "collapse navbar-collapse single-page-nav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/add_weight"><span class="icn"><i class="fas fa-2x fa-weight"></i></span> Add Weight</a>
+                        <a class="nav-link" href="{{ url_for('personal_details') }}"><span class="icn"><i class="fas fa-2x fa-user-circle"></i></span> Personal Details</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/weights"><span class="icn"><i class="fas fa-2x fa-users"></i></span> Weight Registery</a>
+                        <a class="nav-link" href="/weights"><span class="icn"><i class="fas fa-2x fa-weight"></i></span> Weight Registery</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('logout') }}"><span class="icn"><i class="fas fa-2x fa-sign-out-alt"></i></span> Logout</a>
@@ -35,9 +50,10 @@
     </header>
     <!-- Place for dynamic content -->
 </div>
+</div>
 
 <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
 </html>
