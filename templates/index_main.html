@@ -1,59 +1,138 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <title>App Interface</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+        }
+        .bg-image {
+            background-image: url("{{ url_for('static', filename='img/section-1-bg.jpg') }}");
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: relative;
+        }
+        .content {
+            position: relative; /* Adjusted from absolute to relative */
+            top: 20px; /* Adjusted for better alignment */
+            left: 0;
+            color: white;
+            padding: 20px; /* Add some padding around the content */
+        }
+        .login-container{
+            margin-top: 2px;
+            background-color: rgba(53, 50, 50, 0.5); /* Semi-transparent background for better readability */
+            padding: 30px;
+            border-radius: 10px;
+            color: #ffffff;
+            width: auto;
+            height:auto;
+            
+        }
+        .database-status {
+            margin-top: 2px;
+            background-color: rgba(46, 84, 119, 0.5);
+            padding: 30px;
+            border-radius: 10px;
+            color: #ffffff;
+            width: auto; /* You can adjust this as needed */
+            height:auto;
+        }
+
+    </style>
 </head>
 <body>
-    <div id="outer">
-        <header class="header order-last" id="tm-header">
-            <nav class="navbar">
-                <div class="collapse navbar-collapse single-page-nav">
-                    <ul class="navbar-nav">
-                        {% if 'user_id' in session %}
+    <div class="bg-image">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6 d-flex justify-self-end align-self-start vertical-align-top">
+                    <!-- Display database status -->
+                    <div class="database-status">
+                        {% if db_status == 'up' %}
+                            <p><i class="fas fa-database" style="font-size:26px;color: #28a745"></i> {{ db_message }}</p>
+                        {% else %}
+                            <p><i class="fas fa-database" style="font-size:26px;color: #dc3545"></i> {{ db_message }}</p>
+                        {% endif %}
+                    </div>
+                </div> 
+                <div class="col-md-6 d-flex align-self-start justify-self-end vertical-align-bottom">       
+                    <div class="login-container">
+                        <h2>Login</h2>
+                        <!-- Display user message or login form -->
+                        {% if 'user_id' not in session %}
+                            <!-- Flash messages for login/register feedback -->
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                                {% if messages %}
+                                    {% for category, message in messages %}
+                                        <div class="alert alert-{{ category }}">{{ message }}</div>
+                                    {% endfor %}
+                                {% endif %}
+                            {% endwith %}
+                        <form action="/login" method="post">
+                            <div class="form-group">
+                                <label for="loginName">Username:</label>
+                                <input type="text" class="form-control" id="loginName" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">Password:</label>
+                                <input type="password" class="form-control" id="loginPassword" name="password" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Login</button>
+                        </form>
+                        <p>Don't have an account? <a href="/register" style="color: rgba(224, 133, 121);">Register</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+        {% else %}
+        {% if user_name %}
+        <div class="alert alert-success" role="alert">
+            Welcome, {{ user_name }}!
+        </div>
+        {% endif %}
+        <div id = "outer" class="container">
+            <header class="header order-last" id="tm-header">
+                <nav class="navbar">
+                    <div class= "collapse navbar-collapse single-page-nav">
+                        <ul class="navbar-nav">
                             <li class="nav-item">
                                 <a class="nav-link" href="/add_weight"><span class="icn"><i class="fas fa-2x fa-weight"></i></span> Add Weight</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/weights"><span class="icn"><i class="fas fa-2x fa-users"></i></span> Get Weights</a>
+                                <a class="nav-link" href="/weights"><span class="icn"><i class="fas fa-2x fa-users"></i></span> Weight Registery</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/logout"><span class="icn"><i class="fas fa-2x fa-sign-out-alt"></i></span> Logout</a>
+                                <a class="nav-link" href="{{ url_for('logout') }}"><span class="icn"><i class="fas fa-2x fa-sign-out-alt"></i></span> Logout</a>
                             </li>
-                        {% else %}                            
-                            <div class="container mt-4">
-                                <div class="db-status">
-                                    {% if db_status == 'up' %}
-                                        <span class="dot" style="height: 25px; width: 25px; background-color: #4CAF50; border-radius: 50%; display: inline-block;"></span>
-                                        <span>{{ message }}</span>
-                                    {% else %}
-                                        <span class="dot" style="height: 25px; width: 25px; background-color: #f44336; border-radius: 50%; display: inline-block;"></span>
-                                        <span>{{ message }}</span>
-                                    {% endif %}
-                                </div>
-                                <div>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/login"><span class="icn"><i class="fas fa-2x fa-sign-in-alt"></i></span> Login</a>
-                                    </li>
-                                    <li class="nav-item">
-                                        <a class="nav-link" href="/register"><span class="icn"><i class="fas fa-2x fa-user-plus"></i></span> Register</a>
-                                    </li>
-                                </div>
-                            </div>
-                        {% endif %}
-                    </ul>
-                </div>
-            </nav>
-        </header>
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+        </div>
+        {% endif %}
     </div>
+</div>
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/slick.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/templatemo-script.js') }}"></script>
+    <script>
+        $(document).ready(function(){
+            // Optional JavaScript to close the modal if you want to perform additional actions
+        });
+    </script>
 </body>
 </html>

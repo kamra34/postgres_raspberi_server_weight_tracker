@@ -2,27 +2,60 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Weight History</title>
+    <title>Weight Registery</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
+    <style>
+        body {
+                background-color: black;
+            }
+        .edit-cell {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <div class="row">
             <div class="col-lg-12">
-                <h1>Weight History</h1>
+                <h1 style="color: white;">Weight Registery</h1>
+                <!-- Add Weight Form -->
+                <form id="add-weight-form" class="mb-4">
+                    <div class="form-row align-items-center">
+                        <div class="col-auto">
+                            <label class="sr-only" for="date">Date</label>
+                            <input type="date" class="form-control mb-2" id="date" placeholder="Date" required>
+                        </div>
+                        <div class="col-auto">
+                            <label class="sr-only" for="weight">Weight</label>
+                            <input type="number" step="0.1" class="form-control mb-2" id="weight" placeholder="Weight in kg" required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary mb-2">Add Weight</button>
+                        </div>
+                    </div>
+                </form>
+
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Date</th>
-                            <th>Weight</th>
+                            <th style="color: white;">Date</th>
+                            <th style="color: white;">Weight (kg)</th>
+                            <th style="color: white;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for w in weights %}
-                        <tr>
-                            <td>{{ w.date_of_measurement }}</td>
-                            <td>{{ w.weight }}</td>
+                        <tr data-weight-id="{{ w.id }}">
+                            <td contenteditable="true" class="edit-cell edit-date" style="color: white;">{{ w.date_of_measurement }}</td>
+                            <td contenteditable="true" class="edit-cell edit-weight" style="color: white;">{{ w.weight }}</td>
+                            <td>
+                                <button class="btn btn-success btn-sm save-btn">Save</button>
+                                <a href="{{ url_for('delete_weight', weight_id=w.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');">Delete</a>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -31,5 +64,56 @@
             </div>
         </div>
     </div>
+
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script>
+        document.querySelectorAll('.save-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = button.closest('tr');
+                const weightId = row.dataset.weightId;
+                const date = row.querySelector('.edit-date').innerText.trim();
+                const weight = row.querySelector('.edit-weight').innerText.trim();
+                
+                fetch('/update_weight/' + weightId, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        // Include CSRF token if necessary
+                    },
+                    body: JSON.stringify({date_of_measurement: date, weight: weight}),
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    console.log('Weight updated successfully');
+                    // Optionally, show a success message or refresh part of the page
+                })
+                .catch(error => console.error('Error updating weight:', error));
+            });
+        });
+    // JavaScript for Add Weight Form submission
+        document.getElementById('add-weight-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const date = document.getElementById('date').value;
+            const weight = document.getElementById('weight').value;
+
+            fetch('/add_weight', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    // Include CSRF token if necessary
+                },
+                body: JSON.stringify({date_of_measurement: date, weight: weight}),
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                console.log('Weight added successfully');
+                // Refresh the page to show the new weight entry
+                window.location.reload();
+            })
+            .catch(error => console.error('Error adding weight:', error));
+        });
+    </script>
 </body>
 </html>
