@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
+</head>
+<body>
+<div id = "outer" class="container">
+    <div class="alert alert-success" role="alert">
+        Welcome, {{ user_name }}!
+    </div>
+    <header class="header order-last" id="tm-header">
+        <nav class="navbar">
+            <div class= "collapse navbar-collapse single-page-nav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/add_weight"><span class="icn"><i class="fas fa-2x fa-weight"></i></span> Add Weight</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/weights"><span class="icn"><i class="fas fa-2x fa-users"></i></span> Weight Registery</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}"><span class="icn"><i class="fas fa-2x fa-sign-out-alt"></i></span> Logout</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <!-- Place for dynamic content -->
+</div>
+
+<script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+</body>
+</html>

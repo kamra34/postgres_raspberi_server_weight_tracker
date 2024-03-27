@@ -16,58 +16,73 @@
             margin: 0;
         }
         .bg-image {
-            background-image: url("{{ url_for('static', filename='img/section-1-bg.jpg') }}");
-            height: 100%;
+            background-image: url("{{ url_for('static', filename='img/weight_tracker.jpg') }}");
+            height: 100vh;
             background-position: center;
             background-repeat: no-repeat;
-            background-size: cover;
+            background-size: contain;
             position: relative;
         }
-        .content {
-            position: relative;
-            top: 20px;
-            left: 0;
+        .button-container {
+            position: absolute;
+        }
+        .button-container button {
+            margin: 10px;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: white;
+            color: black;
+        }
+        .content-container {
+            display: none;
             color: white;
-            padding: 20px;
-        }
-        .login-container{
-            background-color: rgba(53, 50, 50, 0.5);
             padding: 20px;
             border-radius: 10px;
-            color: white;
-            margin: 20px auto;
-            width: fit-content;
+            background-color: rgba(0,0,0,0);
             position: absolute;
-            top: 10px;
+            top: 100px;
             left: 20px;
+            right: 20px;
         }
-        .database-status {
-            background-color: rgba(53, 50, 50, 0.5);
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-            margin: 2px auto;
-            width: fit-content;
+        .box-container{
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 60px;
+            color: rgb(255, 255, 255);
+            margin: 20px auto;
+            width: 810px;
             position: absolute;
-            top: 5px;
-            right: 5px;
+            top: 85px;
+            left: 345px;
         }
     </style>
 </head>
 <body>
 <div class="bg-image">
-    <div class="container">
-        {% if 'user_id' not in session %}
-        <div class="row justify-content-center">
+    <div class="container-fluid">
+        <div id="loginContainer" class="button-container">
+            <button onclick="showContent('login')">Login</button>
+        </div>
+        <div id="registerContainer" class="button-container">
+            <button onclick="showContent('register')">Register</button>
+        </div>
+        <div id="contactContainer" class="button-container">
+            <button onclick="showContent('contact')">Contact</button>
+        </div>
+        <div id="dbContainer" class="button-container">
+            <button onclick="showContent('dbStatus')">Check Database Status</button>
+        </div>
+        <div id="login" class="content-container">
             <div class="col-md-6 justify-self-start align-self-start vertical-align-top">
-                <div class="login-container">
-                    <!-- Flash messages for login/register feedback -->
+                <div class="box-container">
                     {% with messages = get_flashed_messages(with_categories=true) %}
-                    {% if messages %}
-                        {% for category, message in messages %}
-                            <div class="alert alert-{{ category }}">{{ message }}</div>
-                        {% endfor %}
-                    {% endif %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
                     {% endwith %}
                     <!-- Login form -->
                     <h2>Login</h2>
@@ -80,49 +95,151 @@
                             <label for="loginPassword">Password:</label>
                             <input type="password" class="form-control" id="loginPassword" name="password" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Login</button>
+                        <p><button type="submit" class="btn btn-primary">Login</button><a href="/" class="btn btn-primary">Go Back</a></p>
                     </form>
-                    <p>Don't have an account? <a href="/register" style="color: rgba(224, 133, 121);">Register</a></p>
                 </div>
             </div>
-            <div class="col-md-6 justify-self-end justify-content-end">
-                <div class="database-status">
-                    <!-- Database status content -->
+        </div>
+        <div id="register" class="content-container">
+            <div class="col-md-6 justify-self-start align-self-start vertical-align-top">
+                <div class="box-container">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                        {% if messages %}
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    <!-- Register form -->
+                    <h2>Register</h2>
+                    <form action="/register" method="post">
+                        <div class="form-group">
+                            <label for="registerName" style="color: white;">Username:</label>
+                            <input type="text" class="form-control" id="registerName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="registerPassword" style="color: white;">Password:</label>
+                            <input type="password" class="form-control" id="registerPassword" name="password" required>
+                        </div>
+                        <p><button type="submit" class="btn btn-primary">Register</button><a href="/" class="btn btn-primary">Go Back</a></p>
+                    </form>
+                    <p>Already have an account? <a href="/login" style="color: rgba(224, 133, 121);">Login</a></p>
+                </div>
+            </div>           
+        </div>
+        <div id="contact" class="content-container">
+            <div class="col-md-12">
+                <div class="box-container">
+                    <!-- Enhanced Contact info -->
+                    <h2>Contact Information</h2>
+                    <div class="profile-info">
+                        <!--<img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="Profile Image" class="profile-image">-->
+                        <p class="bio">Feel free to reach out to me on GitHub or LinkedIn or drop me an email!</p>
+                    </div>
+                    <div class="contact-links">
+                        <a href="https://github.com/kamra34/" target="_blank" class="contact-link">
+                            <i class="fab fa-github"></i> GitHub
+                        </a>
+                        <br>
+                        <br>
+                        <a href="https://www.linkedin.com/in/kamiarradnosrati/" target="_blank" class="contact-link">
+                            <i class="fab fa-linkedin"></i> LinkedIn
+                        </a>
+                        <br>
+                        <br>
+                        <!-- Example email link; ensure to protect against spam bots if using a direct email link -->
+                        <a href="mailto:your.email@example.com" class="contact-link">
+                            <i class="fas fa-envelope"></i> Email Me
+                        </a>
+                        <br>
+                        <br>
+                    </div>
+                    <a href="/" class="btn btn-primary">Go Back</a>
+                </div>
+            </div>
+        </div>        
+        <div id="dbStatus" class="content-container">
+            <div class="col-md-12">
+                <div class="box-container">
+                    <!-- Database status content with improved visualization -->
+                    <h2>Database Status</h2>
                     {% if db_status == 'up' %}
-                        <p><i class="fas fa-database" style="font-size:26px;color: #28a745"></i> Database is up and running. Available Tables: {{ tables|join(', ') }}</p>
+                        <p><i class="fas fa-database" style="font-size:26px;color: #28a745"></i> Database is up and running.</p>
+                        <h3>Available Tables</h3>
+                        {% if tables|length > 0 %}
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Table Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for table in tables %}
+                                <tr>
+                                    <td>{{ table }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        {% else %}
+                        <p>No tables available.</p>
+                        {% endif %}
                     {% else %}
                         <p><i class="fas fa-database" style="font-size:26px;color: #dc3545"></i> Database connection failed.</p>
                     {% endif %}
+                    <a href="/" class="btn btn-primary">Go Back</a>
                 </div>
-            </div>
-        </div>
-        {% else %}
-        <div class="container text-center">
-            <div class="alert alert-success" role="alert">
-                Welcome, {{ user_name }}!
-            </div>
-            <nav class="navbar navbar-expand-lg navbar-light bg-light">
-                <div class="navbar-nav">
-                    <a class="nav-item nav-link" href="/add_weight">Add Weight</a>
-                    <a class="nav-item nav-link" href="/weights">Weight Registry</a>
-                    <a class="nav-item nav-link" href="{{ url_for('logout') }}">Logout</a>
-                </div>
-            </nav>
-        </div>
-        {% endif %}
+            </div>  
+        </div>        
     </div>
 </div>
+<script>
+    function showContent(id) {
+        const contents = document.querySelectorAll('.content-container');
+        contents.forEach(content => content.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+    }
+
+    function moveButton(id) {
+        const container = document.getElementById(id);
+        if(id === "loginContainer") {
+            container.style.top = "90px";
+            container.style.left = "350px";
+            container.style.right = "";
+            container.style.bottom = "";
+        } else if(id === "registerContainer") {
+            container.style.top = "90px";
+            container.style.left = "475px";
+            container.style.right = "";
+            container.style.bottom = "";
+        } else if(id === "contactContainer") {
+            container.style.top = "90px";
+            container.style.left = "660px";
+            container.style.right = "";
+            container.style.bottom = "";
+        } else if(id === "dbContainer") {
+            container.style.top = "90px";
+            container.style.left = "900px";}
+            container.style.right = "";
+            container.style.bottom = "";
+        }
+
+    // Example usage: move each button to a different corner
+    moveButton('loginContainer');
+    moveButton('registerContainer');
+    moveButton('contactContainer');
+    moveButton('dbContainer');
+</script>
 <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-</body>
 <script src="{{ url_for('static', filename='js/slick.js') }}"></script>
 <script src="{{ url_for('static', filename='js/templatemo-script.js') }}"></script>
+
 <script>
     $(document).ready(function() {
-        // Your custom JavaScript for UI enhancements can go here
+        // Additional JavaScript for UI enhancements can go here
     });
 </script>
 </body>
 </html>
-

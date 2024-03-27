@@ -16,93 +16,91 @@
             margin: 0;
         }
         .bg-image {
-            background-image: url("{{ url_for('static', filename='img/section-1-bg.jpg') }}");
-            height: 100%;
+            background-image: url("{{ url_for('static', filename='img/weight_tracker.jpg') }}");
+            height: 100vh; /* Use vh for full viewport height */
             background-position: center;
             background-repeat: no-repeat;
-            background-size: cover;
+            background-size: contain; /* Use contain instead of cover */
             position: relative;
         }
         .content {
-            position: relative; /* Adjusted from absolute to relative */
-            top: 20px; /* Adjusted for better alignment */
+            position: relative;
+            top: 20px;
             left: 0;
             color: white;
-            padding: 20px; /* Add some padding around the content */
+            padding: 20px;
         }
         .login-container{
-            margin-top: 2px;
-            background-color: rgba(53, 50, 50, 0.5); /* Semi-transparent background for better readability */
-            padding: 30px;
+            background-color: rgba(53, 50, 50, 0.5);
+            padding: 20px;
             border-radius: 10px;
-            color: #ffffff;
-            width: auto;
-            height:auto;
-            
+            color: white;
+            margin: 20px auto;
+            width: fit-content;
+            position: absolute;
+            top: 10px;
+            left: 20px;
         }
         .database-status {
-            margin-top: 2px;
-            background-color: rgba(46, 84, 119, 0.5);
-            padding: 30px;
+            background-color: rgba(53, 50, 50, 0.5);
+            padding: 20px;
             border-radius: 10px;
-            color: #ffffff;
-            width: auto; /* You can adjust this as needed */
-            height:auto;
+            color: white;
+            margin: 2px auto;
+            width: fit-content;
+            position: absolute;
+            top: 5px;
+            right: 5px;
         }
-
     </style>
 </head>
 <body>
-    <div class="bg-image">
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-md-6 d-flex justify-self-end align-self-start vertical-align-top">
-                    <!-- Display database status -->
-                    <div class="database-status">
-                        {% if db_status == 'up' %}
-                            <p><i class="fas fa-database" style="font-size:26px;color: #28a745"></i> {{ db_message }}</p>
-                        {% else %}
-                            <p><i class="fas fa-database" style="font-size:26px;color: #dc3545"></i> {{ db_message }}</p>
-                        {% endif %}
-                    </div>
-                </div> 
-                <div class="col-md-6 d-flex align-self-start justify-self-end vertical-align-bottom">       
-                    <div class="login-container">
-                        <h2>Login</h2>
-                        <!-- Display user message or login form -->
-                        {% if 'user_id' not in session %}
-                            <!-- Flash messages for login/register feedback -->
-                            {% with messages = get_flashed_messages(with_categories=true) %}
-                                {% if messages %}
-                                    {% for category, message in messages %}
-                                        <div class="alert alert-{{ category }}">{{ message }}</div>
-                                    {% endfor %}
-                                {% endif %}
-                            {% endwith %}
-                        <form action="/login" method="post">
-                            <div class="form-group">
-                                <label for="loginName">Username:</label>
-                                <input type="text" class="form-control" id="loginName" name="name" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="loginPassword">Password:</label>
-                                <input type="password" class="form-control" id="loginPassword" name="password" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Login</button>
-                        </form>
-                        <p>Don't have an account? <a href="/register" style="color: rgba(224, 133, 121);">Register</a></p>
-                    </div>
+<div class="bg-image">
+    <div class="container">
+        {% if 'user_id' not in session %}
+        <div class="row justify-content-center">
+            <div class="col-md-6 justify-self-start align-self-start vertical-align-top">
+                <div class="login-container">
+                    <!-- Flash messages for login/register feedback -->
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    {% endwith %}
+                    <!-- Login form -->
+                    <h2>Login</h2>
+                    <form action="/login" method="post">
+                        <div class="form-group">
+                            <label for="loginName">Username:</label>
+                            <input type="text" class="form-control" id="loginName" name="name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="loginPassword">Password:</label>
+                            <input type="password" class="form-control" id="loginPassword" name="password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Login</button>
+                    </form>
+                    <p>Don't have an account? <a href="/register" style="color: rgba(224, 133, 121);">Register</a></p>
+                </div>
+            </div>
+            <div class="col-md-6 justify-self-end justify-content-end">
+                <div class="database-status">
+                    <!-- Database status content -->
+                    {% if db_status == 'up' %}
+                        <p><i class="fas fa-database" style="font-size:26px;color: #28a745"></i> Database is up and running. Available Tables: {{ tables|join(', ') }}</p>
+                    {% else %}
+                        <p><i class="fas fa-database" style="font-size:26px;color: #dc3545"></i> Database connection failed.</p>
+                    {% endif %}
                 </div>
             </div>
         </div>
-    </div>
         {% else %}
-        {% if user_name %}
-        <div class="alert alert-success" role="alert">
-            Welcome, {{ user_name }}!
-        </div>
-        {% endif %}
         <div id = "outer" class="container">
+            <div class="alert alert-success" role="alert">
+                Welcome, {{ user_name }}!
+            </div>
             <header class="header order-last" id="tm-header">
                 <nav class="navbar">
                     <div class= "collapse navbar-collapse single-page-nav">
@@ -124,15 +122,17 @@
         {% endif %}
     </div>
 </div>
-    <!-- Optional JavaScript -->
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-    <script>
-        $(document).ready(function(){
-            // Optional JavaScript to close the modal if you want to perform additional actions
-        });
-    </script>
+<script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+<script src="{{ url_for('static', filename='js/slick.js') }}"></script>
+<script src="{{ url_for('static', filename='js/templatemo-script.js') }}"></script>
+<script>
+    $(document).ready(function() {
+        // Your custom JavaScript for UI enhancements can go here
+    });
+</script>
 </body>
 </html>
+

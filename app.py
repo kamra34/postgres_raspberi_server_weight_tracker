@@ -102,7 +102,7 @@ def login():
             return redirect(url_for('home'))  # Redirect back to login page to show the error message
         else:
             session['user_id'] = user['id']
-            return redirect(url_for('home'))
+            return redirect(url_for('dashboard'))
 
     # If the method is not POST (i.e., the user is accessing the login page directly), 
     # or if the login failed and redirected here, just render the login template.
@@ -110,6 +110,34 @@ def login():
     # print(session['user_id'])
     return render_template('index.html')
 
+@app.route('/dashboard')
+def dashboard():
+    if 'user_id' in session:
+        try:
+            user_id = session.get('user_id')
+            conn = psycopg2.connect(DATABASE_URL)
+            cur = conn.cursor()
+            cur.execute('SELECT name FROM users WHERE id = %s', (user_id,))
+            user_name_result = cur.fetchone()
+            cur.close()
+            conn.close()
+            if user_name_result:
+                user_name = user_name_result[0]
+                user_message = f'Welcome, {user_name}!'
+            else:
+                user_name = None
+                user_message = 'User not found.'
+        except Exception as e:
+            user_name = None
+            user_message = f'Error fetching user information: {str(e)}'
+    else:
+        return redirect(url_for('login'))
+
+    # Ensure that user_name is always defined, even if it's None, to prevent rendering issues.
+    return render_template('dashboard.html', user_name=user_name, user_message=user_message)
+
+
+       
 
 @app.route('/logout')
 def logout():
