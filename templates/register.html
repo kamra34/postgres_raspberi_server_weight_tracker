@@ -29,6 +29,7 @@
         <div>
             <h2>Register</h2>
             <form action="/register" method="post">
+                {{ csrf_token() }}
                 <div class="form-group">
                     <label for="registerName" style="color: white;">Username:</label>
                     <input type="text" class="form-control" id="registerName" name="name" required>

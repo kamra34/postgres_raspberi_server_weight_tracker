@@ -1,59 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>User Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.cdnfonts.com/css/berlin-sans-fb-demi" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
     <style>
-        body, html {
+        body,
+        html {
             height: 100%;
             margin: 0;
+            box-sizing: border-box;
+            /* Ensures padding does not affect overall width */
         }
-        .bg-image {
-            background-image: url("{{ url_for('static', filename='img/weight_tracker.jpg') }}");
-            height: 100vh;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: cover;
-            position: relative;
+
+        /* Overrides Bootstrap container padding for demonstration */
+        .container {
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .welcome-msg {
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 20px;
+            border-radius: 10px;
+            color: rgb(250, 0, 0);
+            margin: 2px;
+            width: fit-content;
+            position: absolute;
+            top: 0px;
+            right: 0px;
+        }
+
+        .p-info {
+            background-color: rgba(53, 50, 50, 0);
+            padding: 2px;
+            border-radius: 10px;
+            color: rgba(198, 89, 17, 1);
+            margin: 1px;
+            width: 80%;
+            position: absolute;
+            top: 50px;
+            left: 0px;
+            font-family: 'Berlin Sans FB Demi', sans-serif;
+            font-weight: 900;
+            font-size: 100px;
+        }
+
+        .user-table-container {
+            background-color: rgba(53, 50, 50, 0);
+            border-radius: 10px;
+            color: rgba(0, 0, 0, 1);
+            margin: 1px;
+            width: 80%;
+            padding: 0px;
+            position: absolute;
+            top: 94px;
+            left: 0px;
+        }
+
+        .p-info,
+        .user-table-container {
+            margin-top: 1px;
+            margin-left: 0px;
+        }
+
+        .excel-table {
+            border-collapse: collapse;
+            /* Adjust for spacing between rows */
+            border-spacing: 0 0;
+            /* Horizontal and vertical spacing */
+            width: 100%;
+            background-color: #fff;
+            margin-top: 0;
+            /* Adjust spacing from other elements */
+        }
+
+        .excel-table th,
+        .excel-table td {
+            border-right: none;
+            /* Remove right border */
+            border-left: none;
+            /* Remove left border */
+            padding: 2px;
+            text-align: center;
+            background-color: #f9f9f9;
+            /* Row background */
+        }
+
+        .excel-table th {
+            background-color: #ffffff;
+            /* Header background */
+            color: rgb(0, 0, 0);
+            position: sticky;
+            top: 0;
+            /* Stick to top when you scroll */
+        }
+
+        .excel-table tbody tr {
+            /*box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);*/
+            /* Row shadow for depth */
+            border-bottom: 2px solid #ddd;
+            /* Add only bottom border to create horizontal lines */
+        }
+
+        /* Add vertical borders between cells but not on the outer edges */
+        .excel-table th,
+        .excel-table td {
+            border-right: 2px solid #ddd;
+            border-left: 2px solid #ddd;
+        }
+
+        /*.excel-table th:last-child,
+        .excel-table td:last-child {
+            border-right: none;/* Remove the right border for the last cell }*/
+
+
+        .excel-table td {
+            background-color: #ffffff;
+        }
+
+        /* Horizontal lines for first row */
+        .excel-table th::after {
+            content: '';
+            display: block;
+            border-bottom: 3px solid rgb(0, 0, 0);
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: -1px;
+            /* Align with the bottom of the cell */
+        }
+
+        /* Horizontal lines for first row */
+        .excel-table th::before {
+            content: '';
+            display: block;
+            border-top: 3px solid rgb(0, 0, 0);
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 1px;
+            /*Align with the bottom of the cell */
+        }
+
+        /* Adjustments for spacing and alignment */
+        .excel-table th:first-child,
+        .excel-table td:first-child {
+            border-top-left-radius: 0px;
+            /* Rounded corners for the first cell */
+            border-bottom-left-radius: 0px;
+        }
+
+        .excel-table th:last-child,
+        .excel-table td:last-child {
+            border-top-right-radius: 0px;
+            /* Rounded corners for the last cell */
+            border-bottom-right-radius: 0px;
+        }
+
+        /* to increase the entire row's height */
+        .excel-table thead th {
+            padding-top: 20px;
+            /* Increase top padding */
+            padding-bottom: 20px;
+            /* Increase bottom padding */
         }
     </style>
 </head>
-<body>
-<div class="bg-image">
-<div id = "outer" class="container">
-    <div class="alert alert-success" role="alert">
-        Welcome, {{ user_name }}!
-    </div>
-    <header class="header order-last" id="tm-header">
-        <nav class="navbar">
-            <div class= "collapse navbar-collapse single-page-nav">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('personal_details') }}"><span class="icn"><i class="fas fa-2x fa-user-circle"></i></span> Personal Details</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/weights"><span class="icn"><i class="fas fa-2x fa-weight"></i></span> Weight Registery</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('logout') }}"><span class="icn"><i class="fas fa-2x fa-sign-out-alt"></i></span> Logout</a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    </header>
-    <!-- Place for dynamic content -->
-</div>
-</div>
 
-<script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+<body>
+    <div id="outer" class="container">
+        <header class="header order-last" id="tm-header">
+            <nav class="navbar">
+                <div class="collapse navbar-collapse single-page-nav">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('personal_details') }}"><span class="icn"><i
+                                        class="fas fa-2x fa-user-circle"></i></span> Personal Details</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/weights"><span class="icn"><i
+                                        class="fas fa-2x fa-weight"></i></span> Weight Registery</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('logout') }}"><span class="icn"><i
+                                        class="fas fa-2x fa-sign-out-alt"></i></span> Logout</a>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="p-info">
+                    <h2>Personal Information</h2>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="user-table-container">
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Date of Birth</th>
+                            <th>Sex</th>
+                            <th>Height</th>
+                            <th>Activity Level</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in user_details_list %}
+                        <tr>
+                            <td>{{ user[0] or '&nbsp;' | safe }}</td> <!-- Name -->
+                            <td>{{ user[1] or '&nbsp;' | safe }}</td> <!-- Date of Birth -->
+                            <td>{{ user[2] or '&nbsp;' | safe }}</td> <!-- Sex -->
+                            <td>{{ user[4] or '&nbsp;' | safe }}</td> <!-- Height -->
+                            <td>{{ user[3] or '&nbsp;' | safe }}</td> <!-- Activity Level -->
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 </body>
+
 </html>

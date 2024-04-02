@@ -10,6 +10,7 @@
     <div class="container">
         <h1>Add Weight</h1>
         <form action="/add_weight" method="post">
+            {{ csrf_token() }}
             <div class="form-group">
                 <label for="date_of_measurement">Date of Measurement:</label>
                 <input type="date" id="date_of_measurement" name="date_of_measurement" class="form-control" required>

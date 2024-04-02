@@ -87,6 +87,7 @@
                     <!-- Login form -->
                     <h2>Login</h2>
                     <form action="/login" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="form-group">
                             <label for="loginName">Username:</label>
                             <input type="text" class="form-control" id="loginName" name="name" required>
@@ -113,6 +114,7 @@
                     <!-- Register form -->
                     <h2>Register</h2>
                     <form action="/register" method="post">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
                         <div class="form-group">
                             <label for="registerName" style="color: white;">Username:</label>
                             <input type="text" class="form-control" id="registerName" name="name" required>

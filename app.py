@@ -1,5 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
+from datetime import datetime
 import psycopg2
 import psycopg2.extras
 import os
@@ -8,7 +10,8 @@ from dotenv import load_dotenv
 
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
-app.secret_key = 'ReeRa'
+app.config['SECRET_KEY'] = 'ReeRa'  
+csrf = CSRFProtect(app)
 if 'PYTHONANYWHERE_DOMAIN' in os.environ:
     load_dotenv()
     DATABASE_URL = "dbname={databasename} user = {username} host = {hostname} password = {password} port = {portnumber}".format(
@@ -119,8 +122,17 @@ def dashboard():
             cur = conn.cursor()
             cur.execute('SELECT name FROM users WHERE id = %s', (user_id,))
             user_name_result = cur.fetchone()
+            cur.execute("SELECT name, date_of_birth, sex, activity_level, height FROM users WHERE id = %s", (user_id,))
+            user_details = cur.fetchall()
+            user_details_list = []
+            user_details_list = [list(user_details[0])]
             cur.close()
             conn.close()
+            number_of_rows = 5
+            for _ in range(number_of_rows):
+                user_details_list.append([' ', '', '', '', ''])
+            
+            print(user_details_list)
             if user_name_result:
                 user_name = user_name_result[0]
                 user_message = f'Welcome, {user_name}!'
@@ -134,7 +146,7 @@ def dashboard():
         return redirect(url_for('login'))
 
     # Ensure that user_name is always defined, even if it's None, to prevent rendering issues.
-    return render_template('dashboard.html', user_name=user_name, user_message=user_message)
+    return render_template('dashboard.html', user_name=user_name, user_message=user_message, user_details_list = user_details_list)
 
 
        
@@ -146,26 +158,43 @@ def logout():
     # Redirect to login page or home page after logout
     return redirect(url_for('home'))
 
-
-@app.route('/add_weight', methods=['GET', 'POST'])
+@app.route('/add_weight', methods=['POST'])
 def add_weight():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    
-    if request.method == 'POST':
-        date_of_measurement = request.form['date_of_measurement']
-        weight = request.form['weight']
-        
+
+    try:
+        date_of_measurement = request.json['date_of_measurement']
+        weight = request.json['weight']
+
+        # Convert date_of_measurement to a datetime object to ensure it's a valid date
+        date_of_measurement = datetime.strptime(date_of_measurement, '%Y-%m-%d').date()
+
+        # Ensure weight is a float
+        weight = float(weight)
+
+        # Check if a weight record for the given date already exists
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor()
+        cur.execute('SELECT * FROM weights WHERE user_id = %s AND date_of_measurement = %s',
+                    (session['user_id'], date_of_measurement))
+        if cur.fetchone():
+            return jsonify({'error': 'Weight entry for this date already exists.'}), 400
+
+        # Insert the new weight entry
         cur.execute('INSERT INTO weights (user_id, date_of_measurement, weight) VALUES (%s, %s, %s)', 
                     (session['user_id'], date_of_measurement, weight))
         conn.commit()
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except psycopg2.Error as e:
+        return jsonify({'error': 'Database error occurred.'}), 500
+    finally:
         cur.close()
         conn.close()
 
-        return redirect(url_for('get_weights'))
-    return render_template('add_weight.html')
+    return jsonify({'success': 'Weight added successfully'}), 200
+
 
 
 @app.route('/test', methods=['GET'])
@@ -190,6 +219,7 @@ def get_weights():
     # Modify the query to filter weights by the logged-in user's ID
     cur.execute('SELECT * FROM weights WHERE user_id = %s ORDER BY date_of_measurement DESC', (user_id,))
     weights = cur.fetchall()
+    print(weights)
     cur.close()
     conn.close()
 
@@ -234,6 +264,7 @@ def personal_details():
     
     if request.method == 'POST':
         # Extract form data
+        name = request.form.get('name')
         dob = request.form.get('dob')
         sex = request.form.get('sex')
         activity_level = request.form.get('activity_level')
@@ -244,9 +275,9 @@ def personal_details():
             conn = psycopg2.connect(DATABASE_URL)
             cur = conn.cursor()
             cur.execute("""
-                UPDATE users SET date_of_birth = %s, sex = %s, activity_level = %s, height = %s
+                UPDATE users SET name = %s, date_of_birth = %s, sex = %s, activity_level = %s, height = %s
                 WHERE id = %s
-                """, (dob, sex, activity_level, height, user_id))
+                """, (name, dob, sex, activity_level, height, user_id))
             conn.commit()
             cur.close()
             conn.close()
@@ -258,7 +289,7 @@ def personal_details():
     try:
         conn = psycopg2.connect(DATABASE_URL)
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cur.execute("SELECT date_of_birth, sex, activity_level, height FROM users WHERE id = %s", (user_id,))
+        cur.execute("SELECT name, date_of_birth, sex, activity_level, height FROM users WHERE id = %s", (user_id,))
         user_details = cur.fetchone()
         cur.close()
         conn.close()
