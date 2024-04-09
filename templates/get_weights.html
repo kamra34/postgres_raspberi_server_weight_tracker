@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body,
         html {
@@ -112,13 +113,9 @@
             /* Cursor indicates clickable */
         }
 
-        .btn-primary:hover {
-            background-color: #45a049;
-            /* Darker shade on hover */
-        }
-
         .btn-danger,
-        .btn-success {
+        .btn-success,
+        .btn-back {
             /* Common styles for both buttons */
             color: white;
             /* Text color */
@@ -140,10 +137,16 @@
             /* Height of the button */
             border: none;
             /* Remove border */
+            display: inline-flex;
+            /* Use flexbox for easier centering */
+            justify-content: center;
+            /* Center content horizontally in the flex container */
+            align-items: center;
+            /* Center content vertically in the flex container */
         }
 
         .btn-danger {
-            background-color: rgba(198, 89, 17, 1);
+            background-color: rgb(248, 15, 15);
             /* Red color for danger actions */
             line-height: 1.7;
         }
@@ -151,6 +154,22 @@
         .btn-success {
             background-color: #38643a;
             /* Green color for success actions */
+        }
+
+        .btn-back {
+            background-color: rgba(198, 89, 17, 1);
+            /* Red color for danger actions */
+            line-height: 1.7;
+            width: 50px;
+            /* Width of the button */
+            height: 50px;
+        }
+
+        .btn-primary:hover,
+        .btn-danger:hover,
+        .btn-success:hover,
+        .btn-back:hover {
+            opacity: 0.8;
         }
     </style>
 </head>
@@ -186,15 +205,17 @@
                                 <td>
                                     <button class="btn btn-success btn-sm save-btn"><i class="fas fa-save"></i></button>
                                     <a href="{{ url_for('delete_weight', weight_id=w.id) }}"
-                                        class="btn btn-danger btn-sm"
-                                        onclick="return confirm('Are you sure?');"><i class="fas fa-trash"></i></a>
+                                        class="btn btn-danger btn-sm" onclick="return confirm('Are you sure?');"><i
+                                            class="fas fa-trash"></i></a>
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
-                <a href="/dashboard" class="btn btn-primary mt-4">Go Back</a>
+                <a href="/dashboard" class="btn btn-back btn-sm">
+                    <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                </a>
             </div>
         </div>
     </div>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Weight Trend Plot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+
+
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            padding: 20px;
+        }
+
+        h1 {
+            color: rgba(198, 89, 17, 1);
+            font-family: 'Berlin Sans FB Demi', sans-serif;
+            font-weight: 900;
+            font-size: 30px;
+            margin-bottom: 20px;
+        }
+
+        .excel-table th,
+        .excel-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .excel-table {
+            border-collapse: collapse;
+            width: 100%;
+            background-color: #ffffff;
+            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
+            width: 100%;
+            max-width: 650px;
+            height: 100%;
+            max-height: 450px;
+
+        }
+
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .row {
+            margin-bottom: 20px;
+        }
+
+        .col-md-6 {
+            padding: 15px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Velocity</h1>
+                <div id="gaugeChart"
+                    style="width:100%; max-width:650px; height:100%; max-height:450px; background-color: #ffffff; padding: 2px; border-radius: 5px; box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <h1>BMI</h1>
+                <div id="bmiChart"
+                    style="width:100%; max-width:650px; height:100%; max-height:450px; background-color: #ffffff; padding: 2px; border-radius: 5px; box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);">
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h1>Weight Trend</h1>
+                <div id="weightTrendPlot"></div>
+            </div>
+            <div class="col-md-6">
+                <h1>Measurements</h1>
+                <div class="table-container">
+                    <table class="excel-table table-fixed-header">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Weight (kg)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="weightData">
+                            <!-- Data rows will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="container">
+            <a href="/dashboard" class="btn btn-primary mt-4">Go Back</a>
+        </div>
+    </div>
+    <script>
+        let weightChangePerMonth = 0; // Declare as global variable
+
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/api/weight_trend')
+                .then(response => response.json())
+                .then(data => {
+                    const dates = data.dates.map(date => new Date(date));
+                    const weights = data.weights.map(weight => parseFloat(weight));
+
+                    // Create table beside the gauge
+                    let tableHtml = "<table class='table'><thead><tr><th>Date</th><th>Weight (kg)</th></tr></thead><tbody>";
+                    data.dates.forEach((date, index) => {
+                        tableHtml = `<tr><td>${data.dates[data.dates.length - 1 - index]}</td><td>${data.weights[data.weights.length - 1 - index]}</td></tr>` + tableHtml;
+                    });
+                    tableHtml += "</tbody></table>";
+                    document.getElementById('weightData').innerHTML = tableHtml;
+
+                    if (dates.length > 1 && weights.length > 1) {
+                        const firstDate = dates[0];
+                        const lastDate = dates[dates.length - 1];
+                        const firstWeight = weights[0];
+                        const lastWeight = weights[weights.length - 1];
+                        const daysBetween = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
+                        const weightChange = lastWeight - firstWeight;
+                        weightChangePerMonth = (weightChange / daysBetween) * 30;
+                    } else {
+                        console.error('Not enough data to calculate weight change per month.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async function () {
+            // BMI Categories and colors
+            const categories = [
+                { label: "Underweight", range: "<18.5", color: "#900C3F" },
+                { label: "Normal weight", range: "18.5-25", color: "#7AA986" },
+                { label: "Overweight", range: "25-30", color: "#FF5733" },
+                { label: "Obesity Type I", range: "30-35", color: "#C70039" },
+                { label: "Obesity Type II", range: "35-40", color: "#900C3F" },
+                { label: "Obesity Type III", range: ">40", color: "#900C3F" }
+            ];
+
+            // Fetch latest weight and height
+            const user_weight = await fetchLatestWeight();
+            const user_height = await fetchUserHeight();
+            const bmi = computeBMI(user_weight, user_height);
+
+            // Adjusted visualization dimensions to fit the container
+            const svgWidth = 680, svgHeight = 450;
+
+            const svg = d3.select("#bmiChart").append("svg")
+                .attr("width", svgWidth)
+                .attr("height", svgHeight)
+                .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`) // Add this for responsiveness
+                .style("max-width", "100%") // Ensure SVG does not overflow its container
+                .style("height", "auto"); // Adjust height automatically based on the width while maintaining the aspect ratio
+
+
+            const x0 = 50, // Starting x position adjusted for padding
+                y0 = svgHeight / 2 - 30, // Centering Y position based on SVG height
+                width = 80, // Adjusted width of each category to fit within the new SVG width
+                height = 160, // Height of the categories
+                gap = 0; // Gap between categories
+
+            // Draw BMI categories and labels
+            categories.forEach((category, index) => {
+                const x = x0 + index * (width + gap) + 50;
+                svg.append("rect")
+                    .attr("x", x)
+                    .attr("y", y0)
+                    .attr("width", width)
+                    .attr("height", height)
+                    .attr("rx", 55)
+                    .attr("ry", 55)
+                    .style("fill", category.color);
+
+                svg.append("text")
+                    .attr("x", x + width / 2)
+                    .attr("y", y0 + height + 20)
+                    .attr("text-anchor", "middle")
+                    .style("fill", "#000")
+                    .text(category.range);
+
+                //svg.append("text")
+                //.attr("x", x+ width / 2 )
+                //.attr("y", y0 - height ) // Adding category label above the rectangles
+                //.attr("text-anchor", "middle")
+                //.attr("transform", `rotate(-45, ${x + width / 2}, 10)`) // Rotate text -45 degrees around its center
+                //.style("fill", "#000")
+                //.style("font-weight", "light")
+                //.style("font-size", 15)
+                //.style("color", "white")
+                //.text(category.label);
+            });
+
+            // Highlight the user's BMI category
+            const categoryIndex = findBMICategoryIndex(bmi);
+            const highlightX = x0 + categoryIndex * (width + gap) + width / 2 + 50;
+
+            svg.append("circle")
+                .attr("cx", highlightX)
+                .attr("cy", y0 + height / 2)
+                .attr("r", 10)
+                .style("fill", "none")
+                .style("stroke", "black")
+                .style("stroke-width", "3px")
+                .style("fill", "rgba(255, 255, 255, 0.85)") // Semi-transparent white
+                .style("stroke", "rgba(0, 0, 0, 0.2)") // Light grey border
+            //.style("filter", "url(#dropshadow)"); // Applying shadow for 3D effect;
+
+            // Display the user's current weight and BMI
+            const textX = svgWidth / 2; // Central position for the text
+            const textY = 50; // Position above the BMI categories
+            const bmiCategory = findBMICategoryLabel(bmi);
+
+            // Adding a background rectangle for text for better readability
+            svg.append("rect")
+                .attr("x", textX - 150) // Position slightly left of the center
+                .attr("y", textY - 30) // Above the text position
+                .attr("width", 300) // Enough width to cover the text
+                .attr("height", 100) // Enough height for text and some padding
+                .attr("rx", 10) // Rounded corners
+                .attr("ry", 10) // Rounded corners
+                .style("fill", "rgba(255, 255, 255, 0.85)") // Semi-transparent white
+                .style("stroke", "rgba(0, 0, 0, 0.2)") // Light grey border
+                .style("filter", "url(#dropshadow)"); // Applying shadow for 3D effect
+
+            // User's weight
+            svg.append("text")
+                .attr("x", textX)
+                .attr("y", textY)
+                .attr("text-anchor", "middle")
+                .style("fill", "#333")
+                .style("font-size", "16px")
+                .text(`Weight: ${user_weight.toFixed(1)} kg`);
+
+            // User's BMI
+            svg.append("text")
+                .attr("x", textX)
+                .attr("y", textY + 20) // Below the weight text
+                .attr("text-anchor", "middle")
+                .style("fill", "#333")
+                .style("font-size", "16px")
+                .text(`BMI: ${bmi.toFixed(2)}`);
+
+            // Now, add the BMI category text below the BMI value
+            svg.append("text")
+                .attr("x", textX)
+                .attr("y", textY + 40) // Position it below the BMI text
+                .attr("text-anchor", "middle")
+                .style("fill", "#333")
+                .style("font-size", "16px")
+                .text(`Category: ${bmiCategory}`);
+
+            // Definitions for shadow (to simulate 3D effect)
+            const defs = svg.append("defs");
+
+            const filter = defs.append("filter")
+                .attr("id", "dropshadow")
+                .attr("height", "130%"); // To accommodate shadow size
+
+            filter.append("feGaussianBlur")
+                .attr("in", "SourceAlpha")
+                .attr("stdDeviation", 3) // Blur amount
+                .attr("result", "blur");
+
+            filter.append("feOffset")
+                .attr("in", "blur")
+                .attr("dx", 3) // Horizontal offset
+                .attr("dy", 3) // Vertical offset
+                .attr("result", "offsetBlur");
+
+            const feMerge = filter.append("feMerge");
+            feMerge.append("feMergeNode")
+                .attr("in", "offsetBlur")
+            feMerge.append("feMergeNode")
+                .attr("in", "SourceGraphic"); // Original graphic (to show on top of the blur)
+
+            // Assuming user's height in meters is already fetched and stored in `user_height`
+            const normalBMIMin = 18.5;
+            const normalBMIMax = 24.9;
+            // Ideal target BMI in the middle of the normal range for a more realistic goal
+            //const targetBMI = (normalBMIMin + normalBMIMax) / 2;
+            const targetBMI = normalBMIMax;
+            // Target weight for normal BMI range
+            const user_heightInMeters = user_height / 100;
+            const targetWeight = targetBMI * (user_heightInMeters ** 2);
+            // Weeks to reach target, assuming 4.33 weeks in a month for monthly weight loss conversion to weekly
+            const weeksToTarget = Math.abs(user_weight - targetWeight) / Math.abs(weightChangePerMonth / 4.33);
+
+            // Message to be displayed
+            const message = `with ${weightChangePerMonth.toFixed(1)} kg/m,it would take approximately ${weeksToTarget.toFixed(1)} weeks to reach a normal BMI.`;
+
+            // Gradient for text fill
+            const gradient = defs.append("linearGradient")
+                .attr("id", "gradientText")
+                .attr("x1", "0%")
+                .attr("y1", "0%")
+                .attr("x2", "100%")
+                .attr("y2", "0%");
+
+            gradient.append("stop")
+                .attr("offset", "0%")
+                .style("stop-color", "#f60"); // Start color
+
+            gradient.append("stop")
+                .attr("offset", "100%")
+                .style("stop-color", "#ff6"); // End color
+
+            // Append message text with gradient and shadow
+            const messageText = svg.append("text")
+                .attr("x", svgWidth / 2)
+                .attr("y", svgHeight - 30) // Adjust position as needed
+                .attr("text-anchor", "middle")
+                .attr("font-size", "16px")
+                //.style("fill", "url(#gradientText)") // Use gradient
+                //.style("filter", "url(#dropshadow)") // Apply shadow
+                .text(message);
+
+            // Smooth entrance animation for the message
+            messageText.style("opacity", 0)
+                .transition()
+                .duration(2000) // Smooth transition for 2 seconds
+                .style("opacity", 1);
+
+            // Assuming svg, svgWidth, and svgHeight are already defined
+
+            const circleRadius = 40; // Control the size of the circle
+            const circleColor = "#4CAF50"; // Green color for the circle
+            const fontSizeWeeksToTarget = "32px"; // Font size for weeksToTarget
+            const fontSizeWeeksLabel = "12px"; // Smaller font size for "weeks" label
+
+            // Calculate the position for the circle (you can adjust these as needed)
+            const circleX = svgWidth / 2 - 270; // Center of the SVG width
+            const circleY = svgHeight / 2 - 155; // Positioned above the bottom of the SVG
+
+            // Draw the circle
+            svg.append("circle")
+                .attr("cx", circleX)
+                .attr("cy", circleY)
+                .attr("r", circleRadius)
+                .style("fill", circleColor);
+
+            // Add the weeksToTarget text
+            svg.append("text")
+                .attr("x", circleX)
+                .attr("y", circleY) // Vertically center the text in the circle
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-size", fontSizeWeeksToTarget)
+                .text(weeksToTarget.toFixed(1)); // Assuming weeksToTarget is defined
+
+            // Add the "weeks" label below weeksToTarget
+            svg.append("text")
+                .attr("x", circleX)
+                .attr("y", circleY + 20) // Position it right below the weeksToTarget text
+                .attr("text-anchor", "middle")
+                .style("fill", "white") // Ensure readability against the circle's background
+                .style("font-size", fontSizeWeeksLabel)
+                .text("weeks");
+
+
+
+
+            // Functions for fetching weight, height, calculating BMI, and finding category index
+            async function fetchLatestWeight() {
+                const response = await fetch('/api/weight_trend');
+                const data = await response.json();
+                return data.weights ? parseFloat(data.weights[0]) : null;
+            }
+
+            async function fetchUserHeight() {
+                try {
+                    const response = await fetch('/api/user_details', {
+                        credentials: 'include' // Ensures cookies are sent with the request if needed for session authentication
+                    });
+                    if (!response.ok) throw new Error(`Server returned ${response.status}`);
+                    const data = await response.json();
+                    return data.height ? parseInt(data.height, 10) : null;
+                } catch (error) {
+                    console.error("Error fetching user height:", error);
+                    return null;
+                }
+            }
+            function computeBMI(weight, height) {
+                let heightInMeters = height / 100;
+                return weight / (heightInMeters ** 2);
+            }
+
+            function findBMICategoryIndex(bmi) {
+                return categories.findIndex(category => {
+                    if (category.range.includes("<")) return bmi < parseFloat(category.range.slice(1));
+                    if (category.range.includes(">")) return bmi >= parseFloat(category.range.slice(1));
+                    let [min, max] = category.range.split("-").map(parseFloat);
+                    return bmi >= min && bmi <= max;
+                });
+            }
+
+            function findBMICategoryLabel(bmi) {
+                const category = categories.find(category => {
+                    if (category.range.includes("<")) {
+                        return bmi < parseFloat(category.range.slice(1));
+                    } else if (category.range.includes(">")) {
+                        return bmi >= parseFloat(category.range.slice(1));
+                    } else {
+                        let [min, max] = category.range.split("-").map(parseFloat);
+                        return bmi >= min && bmi < max;
+                    }
+                });
+                return category ? category.label : "Unknown";
+            }
+
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/api/weight_trend')
+                .then(response => response.json())
+                .then(data => {
+                    const dates = data.dates.map(date => new Date(date));
+                    const weights = data.weights.map(weight => parseFloat(weight));
+
+                    // Create table beside the gauge
+                    let tableHtml = "<table class='table'><thead><tr><th>Date</th><th>Weight (kg)</th></tr></thead><tbody>";
+                    data.dates.forEach((date, index) => {
+                        tableHtml = `<tr><td>${data.dates[data.dates.length - 1 - index]}</td><td>${data.weights[data.weights.length - 1 - index]}</td></tr>` + tableHtml;
+                    });
+                    tableHtml += "</tbody></table>";
+                    document.getElementById('weightData').innerHTML = tableHtml;
+
+                    if (dates.length > 1 && weights.length > 1) {
+                        const firstDate = dates[0];
+                        const lastDate = dates[dates.length - 1];
+                        const firstWeight = weights[0];
+                        const lastWeight = weights[weights.length - 1];
+                        const daysBetween = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
+                        const weightChange = lastWeight - firstWeight;
+                        const weightChangePerMonth = (weightChange / daysBetween) * 30;
+                        updateGauge(weightChangePerMonth);
+                    } else {
+                        console.error('Not enough data to calculate weight change per month.');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        function updateGauge(weightChangePerMonth) {
+            var gaugeEndColor = weightChangePerMonth < 0 ? 'green' : 'red';
+
+            // Create an array of steps for the gauge, where it's cyan from -10 to 0 and royal blue from 0 to 10.
+            var stepsArray = [
+                { range: [-10, 0], color: 'cyan' },
+                { range: [0, 10], color: 'royalblue' }
+            ];
+
+            // Insert the active step based on the weight change.
+            if (weightChangePerMonth < 0) {
+                // Insert a green step from 0 to the negative value.
+                stepsArray.push({ range: [weightChangePerMonth, 0], color: 'rgba(56, 100, 58, 0.6)' });
+            } else {
+                // Insert a red step from 0 to the positive value.
+                stepsArray.push({ range: [0, weightChangePerMonth], color: 'red' });
+            }
+
+            var gaugeDepth = 10; // Adjust this to change the "depth" of the 3D effect
+            var shadowSteps = [];
+            for (var i = 0; i < gaugeDepth; i++) {
+                shadowSteps.push({
+                    range: [-10 + i, 10 - i],
+                    color: `rgba(200, 200, 200, ${1 - i / gaugeDepth})`,
+                    thickness: 0.01 // This ensures that each step is visible
+                });
+            }
+
+            var data = [
+                {
+                    type: 'indicator',
+                    mode: 'gauge+number',
+                    value: weightChangePerMonth,
+                    number: {
+                        suffix: ' kg/m',
+                        font: {
+                            family: 'Arial, sans-serif',
+                            size: 20,
+                            color: 'green'
+                        }
+                    },
+                    title: {
+                        text: '',
+                        font: {
+                            size: 24,
+                            color: 'blue'
+                        }
+                    },
+                    gauge: {
+                        axis: {
+                            range: [-10, 10],
+                            tickwidth: 1,
+                            tickcolor: 'darkblue',
+                            dtick: 2
+                        },
+                        bar: { color: 'rgba(0,0,0,0)' },
+                        bgcolor: 'white',
+                        borderwidth: 2,
+                        bordercolor: 'gray',
+                        steps: shadowSteps.concat(stepsArray),
+                        threshold: {
+                            line: { color: gaugeEndColor, width: 5 },
+                            thickness: 0.9,
+                            value: weightChangePerMonth
+                        }
+                    }
+                }
+            ];
+
+            var layout = {
+                width: 600,
+                height: 400,
+                margin: { t: 0, r: 25, l: 25, b: 0 },
+                paper_bgcolor: 'white',
+                font: { color: 'darkblue', family: 'Arial' }
+            };
+
+            Plotly.newPlot('gaugeChart', data, layout);
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            fetch('/api/weight_trend')
+                .then(response => response.json())
+                .then(data => {
+                    var xValues = data.dates;
+                    var yValues = data.weights;
+                    var maxWeight = Math.max(...yValues) + 5;
+
+                    var markers = {
+                        size: 10,
+                        color: [],
+                        symbol: []
+                    };
+
+                    // Determine color and symbol for each point based on weight gain or loss
+                    for (let i = 0; i < yValues.length; i++) {
+                        if (i === 0 || yValues[i] > yValues[i - 1]) {
+                            markers.color.push('red'); // Weight gain
+                            markers.symbol.push('triangle-up');
+                        } else {
+                            markers.color.push('green'); // Weight loss
+                            markers.symbol.push('triangle-down');
+                        }
+                    }
+
+                    var trace = {
+                        x: xValues,
+                        y: yValues,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        line: {
+                            color: 'orange'
+                        },
+                        marker: markers
+                    };
+
+                    var layout = {
+                        title: 'Weight Trend',
+                        xaxis: { title: 'Date' },
+                        yaxis: {
+                            title: 'Weight (kg)',
+                            range: [Math.min(...yValues) - 5, maxWeight]
+                        }
+                    };
+
+                    Plotly.newPlot('weightTrendPlot', [trace], layout);
+                })
+                .catch(error => console.error('Error fetching weight trend data:', error));
+        });
+    </script>
+
+</body>
+
+</html>

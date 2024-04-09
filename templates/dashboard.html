@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <style>
         body,
         html {
@@ -63,6 +64,13 @@
             padding: 0px;
             position: absolute;
             top: 94px;
+            left: 0px;
+        }
+
+        .plot-container {
+            padding: 0px;
+            position: relative;
+            top: 350px;
             left: 0px;
         }
 
@@ -191,6 +199,10 @@
                                         class="fas fa-2x fa-weight"></i></span> Weight Registery</a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('plots') }}"><span class="icn"><i
+                                        class="fas fa-2x fa-weight"></i></span> Insights</a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('logout') }}"><span class="icn"><i
                                         class="fas fa-2x fa-sign-out-alt"></i></span> Logout</a>
                         </li>
@@ -231,10 +243,34 @@
                 </table>
             </div>
         </div>
+        <div id="weightTrendPlot" style="width: 600px; height: 400px;"></div>
     </div>
     <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log("Document loaded.");
+
+            var trace = {
+                x: ['2020-01-01', '2020-02-01', '2020-03-01'],
+                y: [70, 71, 69],
+                type: 'scatter',
+                mode: 'lines+markers',
+                marker: { color: 'blue' }
+            };
+            var layout = {
+                title: 'Weight Trend Sample',
+                xaxis: { title: 'Date' },
+                yaxis: { title: 'Weight (kg)' }
+            };
+
+            console.log("About to plot.");
+            Plotly.newPlot('weightTrendPlot', [trace], layout);
+            console.log("Plot should now be visible.");
+        });
+
+    </script>
 </body>
 
 </html>

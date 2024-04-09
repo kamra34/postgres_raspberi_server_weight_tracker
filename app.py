@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify, flash, Response
 from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 from datetime import datetime
@@ -6,6 +6,9 @@ import psycopg2
 import psycopg2.extras
 import os
 from dotenv import load_dotenv
+import io
+from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
+from matplotlib.figure import Figure
 
 
 app = Flask(__name__)
@@ -105,6 +108,7 @@ def login():
             return redirect(url_for('home'))  # Redirect back to login page to show the error message
         else:
             session['user_id'] = user['id']
+            update_target_weight_status(user['id'])
             return redirect(url_for('dashboard'))
 
     # If the method is not POST (i.e., the user is accessing the login page directly), 
@@ -269,6 +273,8 @@ def personal_details():
         sex = request.form.get('sex')
         activity_level = request.form.get('activity_level')
         height = request.form.get('height')
+        # Print form data for debugging
+        print(f"Updating user {user_id} with: {name}, {dob}, {sex}, {activity_level}, {height}")
         
         # Update database
         try:
@@ -299,6 +305,85 @@ def personal_details():
     
     return render_template('personal_details.html', user_details=user_details)
 
+@app.route('/api/user_details')
+def api_user_details():
+    if 'user_id' not in session:
+        # Return an error message in JSON format if the user is not logged in
+        return jsonify({'error': 'User not authenticated'}), 401
+
+    user_id = session['user_id']
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        # Assuming 'height' is stored in meters or another consistent unit
+        cur.execute("SELECT height FROM users WHERE id = %s", (user_id,))
+        user_details = cur.fetchone()
+        cur.close()
+        conn.close()
+
+        if user_details:
+            return jsonify({'height': user_details['height']})
+        else:
+            return jsonify({'error': 'User details not found'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/weight_trend')
+def api_weight_trend():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Please log in to view this content'}), 401
+
+    # Fetch weight data from the database
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute('SELECT date_of_measurement, weight FROM weights WHERE user_id = %s ORDER BY date_of_measurement DESC', (user_id,))
+    weights = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    # Prepare data for JSON response
+    dates = [weight['date_of_measurement'].strftime('%Y-%m-%d') for weight in weights]  # Convert dates to strings
+    weights = [weight['weight'] for weight in weights]
+
+    return jsonify({'dates': dates, 'weights': weights})
+
+@app.route('/plots')
+def plots():
+    # Add any data fetching or processing here if necessary
+    return render_template('plots.html')
+
+def update_target_weight_status(user_id):
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Get the latest weight of the user
+    cur.execute("""
+        SELECT weight FROM weights WHERE user_id = %s ORDER BY date_of_measurement DESC LIMIT 1
+    """, (user_id,))
+    latest_weight = cur.fetchone()[0] if cur.rowcount > 0 else None
+
+    # Update the status based on conditions
+    if latest_weight is not None:
+        today = datetime.today().date()
+        
+        # Update to 'Failed' if target date is passed and target weight is not achieved
+        cur.execute("""
+            UPDATE target_weights
+            SET status = 'Failed'
+            WHERE user_id = %s AND date_of_target < %s AND target_weight < %s AND status = 'In Progress'
+        """, (user_id, today, latest_weight))
+
+        # Update to 'Success' if target weight is achieved before the target date
+        cur.execute("""
+            UPDATE target_weights
+            SET status = 'Success'
+            WHERE user_id = %s AND target_weight >= %s AND status = 'In Progress'
+        """, (user_id, latest_weight))
+
+    conn.commit()
+    cur.close()
 
 
 if __name__ == '__main__':
