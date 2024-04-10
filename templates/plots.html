@@ -7,84 +7,37 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/plots.css') }}" />
     <script src="https://d3js.org/d3.v6.min.js"></script>
-
-
     <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <style>
-        body,
-        html {
-            height: 100%;
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: #f8f9fa;
-        }
-
-        .container {
-            padding: 20px;
-        }
-
-        h1 {
-            color: rgba(198, 89, 17, 1);
-            font-family: 'Berlin Sans FB Demi', sans-serif;
-            font-weight: 900;
-            font-size: 30px;
-            margin-bottom: 20px;
-        }
-
-        .excel-table th,
-        .excel-table td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: left;
-        }
-
-        .excel-table {
-            border-collapse: collapse;
-            width: 100%;
-            background-color: #ffffff;
-            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .table-container {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 20px;
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
-            width: 100%;
-            max-width: 650px;
-            height: 100%;
-            max-height: 450px;
-
-        }
-
-        .btn-primary {
-            background-color: #007bff;
-            border-color: #007bff;
-        }
-
-        .btn-primary:hover {
-            background-color: #0056b3;
-            border-color: #0056b3;
-        }
-
-        .row {
-            margin-bottom: 20px;
-        }
-
-        .col-md-6 {
-            padding: 15px;
-        }
-    </style>
 </head>
+<header class="info-icons">
+    <!-- Back Button Link -->
+    <a href="javascript:history.back()" class="info-link">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+    </a>
+    <a href="{{ url_for('personal_details') }}" class="info-link">
+        <i class="fas fa-user"></i>
+        <span>Personal Details</span>
+    </a>
+    <a href="/weights" class="info-link">
+        <i class="fas fa-weight"></i>
+        <span>Weight Registry</span>
+    </a>
+    <a href="{{ url_for('dashboard') }}" class="info-link">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('logout') }}" class="info-link">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+    </a>
+</header>
 
 <body>
-    <div class="container">
+    <div class ="container">
         <div class="row">
             <div class="col-md-6">
                 <h1>Velocity</h1>

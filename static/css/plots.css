@@ -1,0 +1,99 @@
+body,
+html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f8f9fa;
+}
+#plots {
+    display: flex;
+    height: 100%;
+}
+.info-icons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 60px;
+    padding: 20px;
+    background-color: #ffffff; /* Light background, adjust as needed */
+}
+
+.info-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #343a40; /* Dark text, adjust as needed */
+}
+
+.info-link i {
+    background-color: #007bff; /* Icon background color */
+    color: #ffffff; /* Icon color */
+    border-radius: 50%; /* Makes the icon background circular */
+    padding: 10px;
+    font-size: 24px; /* Adjust icon size as needed */
+    margin-bottom: 5px; /* Space between icon and text */
+}
+
+.info-link span {
+    font-size: 12px; /* Adjust text size as needed */
+    text-align: center;
+}
+.container {
+    padding: 20px;
+}
+
+h1 {
+    color: rgba(198, 89, 17, 1);
+    font-family: 'Berlin Sans FB Demi', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.excel-table th,
+.excel-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.excel-table {
+    border-collapse: collapse;
+    width: 100%;
+    background-color: #ffffff;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.table-container {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+    background-color: #ffffff;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 5px 0px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 650px;
+    height: 100%;
+    max-height: 450px;
+
+}
+
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
+}
+
+.row {
+    margin-bottom: 20px;
+}
+
+.col-md-6 {
+    padding: 15px;
+}

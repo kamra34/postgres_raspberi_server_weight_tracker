@@ -1,0 +1,204 @@
+body,
+html {
+    height: 100%;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+}
+#getWeights {
+    display: flex;
+    height: 100%;
+}
+.info-icons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 60px;
+    padding: 20px;
+    background-color: #ffffff; /* Light background, adjust as needed */
+}
+
+.info-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #343a40; /* Dark text, adjust as needed */
+}
+
+.info-link i {
+    background-color: #007bff; /* Icon background color */
+    color: #ffffff; /* Icon color */
+    border-radius: 50%; /* Makes the icon background circular */
+    padding: 10px;
+    font-size: 24px; /* Adjust icon size as needed */
+    margin-bottom: 5px; /* Space between icon and text */
+}
+
+.info-link span {
+    font-size: 12px; /* Adjust text size as needed */
+    text-align: center;
+}
+.container {
+    padding: 20px;
+}
+
+h1 {
+    color: rgba(198, 89, 17, 1);
+    font-family: 'Berlin Sans FB Demi', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.table-container,
+.add-weight-form {
+    background-color: white;
+    color: black;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    /* Enable vertical scrolling */
+    height: 600px;
+    width: 100%;
+    /* Set a fixed height */
+    margin-bottom: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.table {
+    margin-top: 20px;
+}
+
+.table th,
+.table td {
+    text-align: center;
+}
+
+.excel-table th,
+.excel-table td {
+    border: 2px solid #ddd;
+    /* Adjusted border for visibility */
+    padding: 8px;
+    text-align: center;
+    /* Center align text */
+    background-color: #f9f9f9;
+    /* Row background */
+}
+
+.excel-table th {
+    background-color: #ffffff;
+    /* Header background */
+    color: #333;
+}
+
+.excel-table tbody tr:hover {
+    background-color: #ddd;
+    /* Hover effect for rows */
+}
+
+/* Style adjustments for input fields */
+.form-control {
+    border: 2px solid #ddd;
+    /* Match the table cell border */
+    margin-bottom: 10px;
+    /* Space between form inputs */
+    text-align: center;
+    /* Center text like in the table */
+    background-color: #f9f9f9;
+    /* Match the row background */
+    color: black;
+    /* Ensure text is visible */
+}
+
+/* Style adjustments for the form and table container */
+.add-weight-form,
+.table-container {
+    background-color: #fff;
+    /* White background */
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Soft shadow */
+    margin-bottom: 20px;
+    /* Space between form and table */
+}
+
+/* Adjustments for buttons to match your theme */
+.btn-primary {
+    background-color: #007bff;
+    /* Example primary color */
+    border: none;
+    /* Remove default border */
+    padding: 10px 20px;
+    /* Padding for larger click area */
+    border-radius: 5px;
+    /* Rounded corners */
+    color: white;
+    /* Text color */
+    cursor: pointer;
+    /* Cursor indicates clickable */
+}
+
+.btn-danger,
+.btn-success,
+.btn-back {
+    /* Common styles for both buttons */
+    color: white;
+    /* Text color */
+    padding: 5px;
+    /* Adjust padding as needed */
+    border-radius: 50%;
+    /* Make it circular */
+    text-align: center;
+    /* Center the text/icon inside the button */
+    display: inline-block;
+    /* Allows setting width and height */
+    font-size: 12px;
+    /* Adjust font size as needed */
+    line-height: 1;
+    /* Adjust line height to vertically center text if necessary */
+    width: 30px;
+    /* Width of the button */
+    height: 30px;
+    /* Height of the button */
+    border: none;
+    /* Remove border */
+    display: inline-flex;
+    /* Use flexbox for easier centering */
+    justify-content: center;
+    /* Center content horizontally in the flex container */
+    align-items: center;
+    /* Center content vertically in the flex container */
+}
+
+.btn-danger {
+    background-color: rgb(248, 15, 15);
+    /* Red color for danger actions */
+    line-height: 1.7;
+}
+
+.btn-success {
+    background-color: #38643a;
+    /* Green color for success actions */
+}
+
+.btn-back {
+    background-color: rgba(198, 89, 17, 1);
+    /* Red color for danger actions */
+    line-height: 1.7;
+    width: 50px;
+    /* Width of the button */
+    height: 50px;
+}
+
+.btn-primary:hover,
+.btn-danger:hover,
+.btn-success:hover,
+.btn-back:hover {
+    opacity: 0.8;
+}

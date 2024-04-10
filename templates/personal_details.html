@@ -12,131 +12,31 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
-    <style>
-        body,
-        html {
-            height: 100%;
-            margin: 0;
-            background-color: #f2f2f2;
-        }
-
-        .container {
-            padding-top: 20px;
-        }
-
-        .table-container {
-            background-color: white;
-            color: black;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            position: relative;
-            top: 150px;
-            left: 0px;
-        }
-
-        .excel-table th,
-        .excel-table td {
-            border: 2px solid #ddd;
-            padding: 8px;
-            text-align: center;
-            background-color: #f9f9f9;
-        }
-
-        .excel-table th {
-            background-color: #ffffff;
-            color: #333;
-        }
-
-        .form-control {
-            border: 2px solid #ddd;
-            text-align: center;
-            background-color: #f9f9f9;
-            color: black;
-        }
-
-        /* Adjustments for buttons to match your theme */
-        .btn-primary {
-            background-color: #007bff;
-            /* Example primary color */
-            border: none;
-            /* Remove default border */
-            padding: 10px 20px;
-            /* Padding for larger click area */
-            border-radius: 5px;
-            /* Rounded corners */
-            color: white;
-            /* Text color */
-            cursor: pointer;
-            /* Cursor indicates clickable */
-        }
-
-        .btn-primary:hover {
-            background-color: #45a049;
-            /* Darker shade on hover */
-        }
-
-        .btn-danger,
-        .btn-success {
-            /* Common styles for both buttons */
-            color: white;
-            padding: 5px;
-            border-radius: 50%;
-            text-align: center;
-            /* Center the text/icon inside the button */
-            font-size: 20px;
-            /* Adjust font size as needed */
-            line-height: 30px;
-            /* Adjust line height to vertically center the icon */
-            width: 50px;
-            /* Width of the button */
-            height: 50px;
-            /* Height of the button */
-            border: none;
-            /* Remove border */
-            display: inline-flex;
-            /* Use flexbox for easier centering */
-            justify-content: center;
-            /* Center content horizontally in the flex container */
-            align-items: center;
-            /* Center content vertically in the flex container */
-        }
-
-
-        .btn-primary:hover,
-        .btn-danger:hover,
-        .btn-success:hover {
-            opacity: 0.8;
-        }
-
-        .btn-danger {
-            background-color: rgba(198, 89, 17, 1);
-            /* Red color for danger actions 
-            line-height: 1;*/
-        }
-
-        .btn-success {
-            background-color: #38643a;
-            /* Green color for success actions */
-        }
-
-        .p-info {
-            background-color: rgba(53, 50, 50, 0);
-            padding: 2px;
-            border-radius: 10px;
-            color: rgba(198, 89, 17, 1);
-            margin: 1px;
-            width: 80%;
-            position: absolute;
-            top: 100px;
-            left: 250px;
-            font-family: 'Berlin Sans FB Demi', sans-serif;
-            font-weight: 900;
-            font-size: 100px;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/personal_details.css') }}" />
 </head>
-
+<header class="info-icons">
+    <!-- Back Button Link -->
+    <a href="javascript:history.back()" class="info-link">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+    </a>
+    <a href="/weights" class="info-link">
+        <i class="fas fa-weight"></i>
+        <span>Weight Registry</span>
+    </a>
+    <a href="{{ url_for('plots') }}" class="info-link">
+        <i class="fas fa-chart-line"></i>
+        <span>Insights</span>
+    </a>
+    <a href="{{ url_for('dashboard') }}" class="info-link">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('logout') }}" class="info-link">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+    </a>
+</header>
 <body>
     <div class="container">
         <div class="row">
