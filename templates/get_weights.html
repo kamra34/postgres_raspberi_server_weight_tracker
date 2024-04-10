@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <title>Weight Registery</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
     <link href="https://fonts.cdnfonts.com/css/berlin-sans-fb-demi" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -13,9 +12,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <script src="https://d3js.org/d3.v6.min.js"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/get_weights.css') }}" />
 </head>
 <header class="info-icons">
@@ -41,11 +37,13 @@
         <span>Logout</span>
     </a>
 </header>
+
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <h1>Add</h1>
+    <div id="getWeights">
+        <main class="content">
+            <!--<div class="row">-->
+            <section class="add-table">
+                <h1>Register New Weight</h1>
                 <!-- Simplified the Add Weight Form for styling -->
                 <form id="add-weight-form" class="mb-4">
                     <input type="date" class="form-control mb-2" id="date" placeholder="Date" required>
@@ -53,11 +51,14 @@
                         required>
                     <button type="submit" class="btn btn-primary mb-2">Add Weight</button>
                 </form>
-            </div>
-            <div class="col-md-6">
-                <h1>Edit</h1>
-                <div class="table-container">
-                    <table class="excel-table table">
+
+            </section>
+            <!--</div>-->
+            <!--<div class="row">-->
+            <section class="edit-table">
+                <h2>Edit Registered Weights</h2>
+                <div class="table-scroll">
+                    <table class="excel-table">
                         <thead>
                             <tr>
                                 <th>Date</th>
@@ -81,106 +82,10 @@
                         </tbody>
                     </table>
                 </div>
-            </div>
-        </div>
-        <div class="row">
-            <div id="targetWeightSetter" class="col-12">
-                <!-- D3 visualization will be appended here -->
-            </div>
-        </div>
-        <a href="/dashboard" class="btn btn-danger btn-sm">
-            <i class="fa fa-arrow-left" aria-hidden="true"></i>
-        </a>
+            </section>
+            <!--</div>-->
+        </main>
     </div>
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const svgWidth = 600, svgHeight = 200;
-            const svg = d3.select("#targetWeightSetter").append("svg")
-                .attr("width", svgWidth)
-                .attr("height", svgHeight)
-                .style("background-color", "#FFF")
-                .style("border", "1px solid #ccc")
-                .style("border-radius", "10px");
-
-            // Placeholder elements for user input
-            svg.append("text")
-                .attr("x", 20)
-                .attr("y", 50)
-                .text("Set Target Weight (kg):")
-                .style("font-size", "16px");
-
-            svg.append("foreignObject")
-                .attr("x", 200)
-                .attr("y", 30)
-                .attr("width", 120)
-                .attr("height", 30)
-                .append("xhtml:body")
-                .style("font-size", "14px")
-                .html("<input type='number' id='targetWeightInput' class='form-control' step='0.1'>");
-
-            svg.append("text")
-                .attr("x", 20)
-                .attr("y", 100)
-                .text("Date of Target:")
-                .style("font-size", "16px");
-
-            svg.append("foreignObject")
-                .attr("x", 200)
-                .attr("y", 80)
-                .attr("width", 120)
-                .attr("height", 30)
-                .append("xhtml:body")
-                .style("font-size", "14px")
-                .html("<input type='date' id='targetDateInput' class='form-control'>");
-
-            // Submit button
-            svg.append("rect")
-                .attr("x", 200)
-                .attr("y", 130)
-                .attr("width", 120)
-                .attr("height", 40)
-                .attr("rx", 20) // Rounded corners
-                .style("fill", "#4CAF50")
-                .style("cursor", "pointer")
-                .on("click", submitTargetWeight);
-
-            svg.append("text")
-                .attr("x", 260) // Center text within the button
-                .attr("y", 158) // Adjust for vertical centering
-                .text("Submit")
-                .attr("text-anchor", "middle")
-                .style("fill", "#FFF")
-                .style("font-size", "16px")
-                .style("cursor", "pointer")
-                .on("click", submitTargetWeight);
-
-            function submitTargetWeight() {
-                const formData = new FormData();
-                formData.append('date_of_target', document.getElementById('targetDateInput').value);
-                formData.append('target_weight', document.getElementById('targetWeightInput').value);
-
-                // Fetch API to send the data to the server
-                fetch('/add_target_weight', {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        // Add any necessary headers, such as for CSRF protection
-                        'X-CSRFToken': '{{ csrf_token() }}'
-                    },
-                    credentials: 'include' // Necessary for sessions to work
-                })
-                    .then(response => {
-                        if (!response.ok) {
-                            throw new Error('Network response was not ok');
-                        }
-                        window.location.href = '/dashboard'; // Redirect back to the dashboard
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                    });
-            }
-        });
-    </script>
     <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {

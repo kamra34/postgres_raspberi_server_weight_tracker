@@ -3,7 +3,8 @@ html {
     height: 100%;
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f2f2f2;
+    box-sizing: border-box;
+    background-color: #ffffff;
 }
 #getWeights {
     display: flex;
@@ -48,6 +49,15 @@ h1 {
     font-weight: 900;
     font-size: 30px;
     margin-bottom: 20px;
+    margin-top: 20px;
+}
+h2 {
+    color: rgba(198, 89, 17, 1);
+    font-family: 'Berlin Sans FB Demi', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    margin-bottom: 20px;
+    margin-top: 20px;
 }
 
 .table-container,
@@ -65,11 +75,6 @@ h1 {
     margin-bottom: 20px;
 }
 
-h1 {
-    text-align: center;
-    margin-bottom: 20px;
-}
-
 .table {
     margin-top: 20px;
 }
@@ -79,13 +84,25 @@ h1 {
     text-align: center;
 }
 
+.excel-table {
+    border-collapse: collapse;
+    /* Adjust for spacing between rows */
+    border-spacing: 0 0;
+    /* Horizontal and vertical spacing */
+    width: 100%;
+    background-color: #fff;
+    margin-top: 0;
+    /* Adjust spacing from other elements */
+}
+
 .excel-table th,
 .excel-table td {
-    border: 2px solid #ddd;
-    /* Adjusted border for visibility */
-    padding: 8px;
+    border-right: none;
+    /* Remove right border */
+    border-left: none;
+    /* Remove left border */
+    padding: 15px;
     text-align: center;
-    /* Center align text */
     background-color: #f9f9f9;
     /* Row background */
 }
@@ -93,12 +110,53 @@ h1 {
 .excel-table th {
     background-color: #ffffff;
     /* Header background */
-    color: #333;
+    color: rgb(0, 0, 0);
+    position: sticky;
+    top: 0;
+    /* Stick to top when you scroll */
+}
+
+.excel-table tbody tr {
+    /*box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);*/
+    /* Row shadow for depth */
+    border-bottom: 2px solid #ddd;
+    /* Add only bottom border to create horizontal lines */
+}
+
+/* Add vertical borders between cells but not on the outer edges */
+.excel-table th,
+.excel-table td {
+    border-right: 2px solid #ddd;
+    border-left: 2px solid #ddd;
 }
 
 .excel-table tbody tr:hover {
     background-color: #ddd;
     /* Hover effect for rows */
+}
+
+/* Horizontal lines for first row */
+.excel-table th::after {
+    content: '';
+    display: block;
+    border-bottom: 3px solid rgb(0, 0, 0);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    /* Align with the bottom of the cell */
+}
+
+/* Horizontal lines for first row */
+.excel-table th::before {
+    content: '';
+    display: block;
+    border-top: 3px solid rgb(0, 0, 0);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 1px;
+    /*Align with the bottom of the cell */
 }
 
 /* Style adjustments for input fields */
@@ -201,4 +259,31 @@ h1 {
 .btn-success:hover,
 .btn-back:hover {
     opacity: 0.8;
+}
+
+.content {
+    display: flex; /* Establishes a flex container */
+    flex-wrap: wrap; /* Allows items to wrap as needed, though not necessary if they fit side by side */
+    height: auto; /* Adjusts height based on content */
+    width: 100%; /* Ensures the container fills the full width of its parent */
+}
+
+/* Adjusted styles for .add-table and .edit-table */
+.add-table, .edit-table {
+    box-sizing: border-box; /* Ensures padding and border are included in the width calculation */
+    padding: 20px; /* Adds some internal spacing */
+    overflow-y: auto; /* Adds vertical scroll if content overflows */
+}
+
+.add-table {
+    flex: 0 0 40%; /* Disables the grow and shrink properties, setting the basis to 40% */
+}
+
+.edit-table {
+    flex: 0 0 60%; /* Disables the grow and shrink properties, setting the basis to 60% */
+}
+
+.table-scroll {
+    height: 600px; /* Fixed height */
+    overflow-y: auto; /* Enables vertical scrolling */
 }
