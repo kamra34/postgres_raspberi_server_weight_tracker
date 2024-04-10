@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>User Dashboard</title>
@@ -9,15 +10,32 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
+<header class="info-icons">
+    <a href="{{ url_for('personal_details') }}" class="info-link">
+        <i class="fas fa-user"></i>
+        <span>Details</span>
+    </a>
+    <a href="/weights" class="info-link">
+        <i class="fas fa-weight"></i>
+        <span>Weight Registry</span>
+    </a>
+    <a href="{{ url_for('plots') }}" class="info-link">
+        <i class="fas fa-chart-line"></i>
+        <span>Insights</span>
+    </a>
+    <a href="{{ url_for('logout') }}" class="info-link">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+    </a>
+</header>
+
 <body>
     <div id="dashboard">
         <nav class="nav flex-column bg-light">
             <ul class="navbar-nav">
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('personal_details') }}">Personal Details</a></li>
-                <li class="nav-item"><a class="nav-link" href="/weights">Weight Registry</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('plots') }}">Insights</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('logout') }}">Logout</a></li>
+                <div id="d3-container"></div>
             </ul>
         </nav>
         <main class="content">
@@ -73,6 +91,186 @@
             </section>
         </main>
     </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", async function () {
+            const user_weight = await fetchLatestWeight();
+            const user_height = await fetchUserHeight();
+            const user_BMI = computeBMI(user_weight, user_height);
+            const num_weights = await fetchTotalWeightRegistries();
+            const num_targets = await fetchTotalTargetRegistries();
+
+            const data = [
+                { id: "totalTargets", value: 120, label: "Total Targets", color: "#007bff", radius: 40 },
+                { id: "weightsRegistered", value: 300, label: "Weights Registered", color: "#28a745", radius: 40 },
+                { id: "currentWeight", value: user_weight, label: "Current Weight", subLabel: "Latest (kg)", color: "#dc3545", radius: 50 },
+                { id: "lastTargetStatus", value: "Achieved", label: "Last Target Status", color: "#ffc107", radius: 40 }
+            ];
+
+            const svgWidth = 200, svgHeight = data.length * 160; // Increased spacing to accommodate sub labels
+
+            const svg = d3.select('#d3-container').append('svg')
+                .attr('width', svgWidth) // Increased width to prevent text clipping
+                .attr('height', svgHeight)
+                .attr("viewBox", `0 0 ${svgWidth} ${svgHeight}`) // Add this for responsiveness
+                .style("max-width", "100%") // Ensure SVG does not overflow its container
+                .style("height", "auto"); // Adjust height automatically based on the width while maintaining the aspect ratio
+
+            const x0 = 50, // Starting x position adjusted for padding
+                y0 = svgHeight / 2 - 200, // Centering Y position based on SVG height
+                width = 100, // Adjusted width of each category to fit within the new SVG width
+                height = 160, // Height of the categories
+                gap = 0; // Gap between categories
+
+            const fontSize = "16px"
+            const x_w_b = x0 - 10
+            svg.append("circle")
+                .attr("cx", x0 - 10)
+                .attr("cy", y0 + 50)
+                .attr("r", 55)
+                .style("fill", "#C70039");
+            svg.append("text")
+                .attr("x", x_w_b + 2)
+                .attr("y", y0 + 50)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-size", "30px")
+                .style("font-weight", "bold") // Make the text bold
+                .text(`${user_weight.toFixed(1)}`);
+            svg.append("text")
+                .attr("x", x_w_b + 2)
+                .attr("y", y0 + 70)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-size", "16px")
+                .text(`kg`);
+
+            svg.append("circle")
+                .attr("cx", x0 + 70)
+                .attr("cy", y0 + 200)
+                .attr("r", 55)
+                .style("fill", "#2F76EA");
+            svg.append("text")
+                .attr("x", x0 + 70)
+                .attr("y", y0 + 200)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-size", "30px")
+                .style("font-weight", "bold") // Make the text bold
+                .text(`${user_BMI.toFixed(2)}`);
+            svg.append("text")
+                .attr("x", x0 + 70)
+                .attr("y", y0 + 220)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-size", "16px")
+                .text(`kg/m2`);
+
+            const x_t_w = x0 - 10
+            svg.append("rect")
+                .attr("x", x0 - 12)
+                .attr("y", y0 - 110)
+                .attr("width", height)
+                .attr("height", width)
+                .attr("rx", 65)
+                .attr("ry", 65)
+                .style("fill", "#4CAF50");
+            svg.append("text")
+                .attr("x", x_t_w + 80)
+                .attr("y", y0 - 80)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-size", fontSize)
+                .text("Total Weightings:");
+            svg.append("text")
+                .attr("x", x_t_w + 80)
+                .attr("y", y0 - 40)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-weight", "bold")
+                .style("font-size", "40px")
+                .text(`${num_weights}`);
+
+            const x_t_t = x0 - 10
+            svg.append("rect")
+                .attr("x", x0 - 40)
+                .attr("y", y0 + 300)
+                .attr("width", width)
+                .attr("height", height)
+                .attr("rx", 85)
+                .attr("ry", 245)
+                .style("fill", "#FF5733");
+            svg.append("text")
+                .attr("x", x_t_t + 20)
+                .attr("y", y0 + 360)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-size", fontSize)
+                .text("Targets set:");
+            svg.append("text")
+                .attr("x", x_t_w + 20)
+                .attr("y", y0 + 400)
+                .attr("text-anchor", "middle")
+                .attr("dominant-baseline", "middle") // Ensure the text is centered
+                .style("fill", "white") // Choose a color that contrasts with the circle
+                .style("font-size", "40px")
+                .style("font-weight", "bold")
+                .text(`${num_targets}`);
+
+        });
+
+        // Functions for fetching weight, height, calculating BMI, and finding category index
+        async function fetchLatestWeight() {
+            const response = await fetch('/api/weight_trend');
+            const data = await response.json();
+            return data.weights ? parseFloat(data.weights[0]) : null;
+        }
+        async function fetchTotalWeightRegistries() {
+            try {
+                const response = await fetch('/api/weight_trend');
+                const data = await response.json();
+                // Assuming data.weights is an array of weight entries
+                return data.weights ? data.weights.length : 0;
+            } catch (error) {
+                console.error("Fetching total weight registries failed:", error);
+                return 0; // Return 0 or handle the error as appropriate
+            }
+        }
+        async function fetchTotalTargetRegistries() {
+            try {
+                const response = await fetch('/api/target_weights');
+                const data = await response.json();
+                // Assuming data.weights is an array of weight entries
+                return data.dates ? data.dates.length : 0;
+            } catch (error) {
+                console.error("Fetching total target registries failed:", error);
+                return 0; // Return 0 or handle the error as appropriate
+            }
+        }
+        async function fetchUserHeight() {
+            try {
+                const response = await fetch('/api/user_details', {
+                    credentials: 'include' // Ensures cookies are sent with the request if needed for session authentication
+                });
+                if (!response.ok) throw new Error(`Server returned ${response.status}`);
+                const data = await response.json();
+                return data.height ? parseInt(data.height, 10) : null;
+            } catch (error) {
+                console.error("Error fetching user height:", error);
+                return null;
+            }
+        }
+        function computeBMI(weight, height) {
+            let heightInMeters = height / 100;
+            return weight / (heightInMeters ** 2);
+        }
+    </script>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>

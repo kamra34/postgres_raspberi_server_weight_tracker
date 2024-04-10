@@ -8,11 +8,86 @@ body, html {
     display: flex;
     height: 100%;
 }
-.nav {
-    flex: 0 1 200px;
+.info-icons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 60px;
     padding: 20px;
-    overflow-y: auto; /* Add scrolling for small screens */
+    background-color: #ffffff; /* Light background, adjust as needed */
 }
+
+.info-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #343a40; /* Dark text, adjust as needed */
+}
+
+.info-link i {
+    background-color: #007bff; /* Icon background color */
+    color: #ffffff; /* Icon color */
+    border-radius: 50%; /* Makes the icon background circular */
+    padding: 10px;
+    font-size: 24px; /* Adjust icon size as needed */
+    margin-bottom: 5px; /* Space between icon and text */
+}
+
+.info-link span {
+    font-size: 12px; /* Adjust text size as needed */
+    text-align: center;
+}
+
+/* Sidebar Base Styles */
+.nav {
+    flex: 0 1 220px;
+    padding: 20px;
+    overflow-y: auto;
+    background-color: #343a40; /* Dark background for a modern look */
+    color: #ffffff; /* Ensures text is visible against the dark background */
+}
+
+.navbar-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.nav-link {
+    color: #adb5bd; /* Lighter text color for visibility, change as needed */
+    padding: 10px 15px;
+    text-decoration: none;
+    display: flex;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effects */
+    align-items: center; /* Centers items vertically */
+    gap: 10px; /* Adds space between icon and text */
+}
+
+.nav-link:hover, .nav-link:focus {
+    background-color: rgba(198, 89, 17, 1); /* Slightly darker shade on hover/focus */
+    color: #ffffff; /* Ensure text is fully visible on hover */
+    text-decoration: none;
+}
+
+.nav-item + .nav-item {
+    margin-top: 10px;
+}
+
+/* Icon adjustments for better alignment and spacing */
+.nav-link .fas {
+    margin-right: 8px;
+    width: 20px; /* Ensures icons have a consistent width */
+    text-align: center; /* Centers the icons horizontally */
+}
+
+/* Font adjustments */
+.nav-link {
+    font-family: 'Source Sans Pro', sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+}
+
 .content {
     flex: 1;
     padding: 20px;

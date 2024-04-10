@@ -467,6 +467,30 @@ def update_target_weight_status(user_id):
     conn.commit()
     cur.close()
 
+@app.route('/api/target_weights')
+def api_target_weights():
+    user_id = session.get('user_id')
+    if not user_id:
+        return jsonify({'error': 'Please log in to view this content'}), 401
+
+    # Fetch weight data from the database
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""
+            SELECT created_date, target_weight, date_of_target, status 
+            FROM target_weights 
+            WHERE user_id = %s
+            """, (user_id,))
+    targets = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    # Prepare data for JSON response
+    dates = [target['created_date'].strftime('%Y-%m-%d') for target in targets]  # Convert dates to strings
+    status = [target['status'] for target in targets]
+
+    return jsonify({'dates': dates, 'status': status})
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', debug=True)
