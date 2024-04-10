@@ -1,0 +1,136 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+#dashboard {
+    display: flex;
+    height: 100%;
+}
+.nav {
+    flex: 0 1 200px;
+    padding: 20px;
+    overflow-y: auto; /* Add scrolling for small screens */
+}
+.content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto; /* Add scrolling for content */
+}
+h1 {
+    color: rgba(198, 89, 17, 1);
+    font-family: 'Berlin Sans FB Demi', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+h2 {
+    color: rgba(198, 89, 17, 1);
+    font-family: 'Berlin Sans FB Demi', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    margin-bottom: 20px;
+    margin-top: 40px;
+}
+.excel-table {
+    border-collapse: collapse;
+    /* Adjust for spacing between rows */
+    border-spacing: 0 0;
+    /* Horizontal and vertical spacing */
+    width: 100%;
+    background-color: #fff;
+    margin-top: 0;
+    /* Adjust spacing from other elements */
+}
+
+.excel-table th,
+.excel-table td {
+    border-right: none;
+    /* Remove right border */
+    border-left: none;
+    /* Remove left border */
+    padding: 2px;
+    text-align: center;
+    background-color: #f9f9f9;
+    /* Row background */
+}
+
+.excel-table th {
+    background-color: #ffffff;
+    /* Header background */
+    color: rgb(0, 0, 0);
+    position: sticky;
+    top: 0;
+    /* Stick to top when you scroll */
+}
+
+.excel-table tbody tr {
+    /*box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);*/
+    /* Row shadow for depth */
+    border-bottom: 2px solid #ddd;
+    /* Add only bottom border to create horizontal lines */
+}
+
+/* Add vertical borders between cells but not on the outer edges */
+.excel-table th,
+.excel-table td {
+    border-right: 2px solid #ddd;
+    border-left: 2px solid #ddd;
+}
+
+/*.excel-table th:last-child,
+.excel-table td:last-child {
+    border-right: none;/* Remove the right border for the last cell }*/
+
+
+.excel-table td {
+    background-color: #ffffff;
+}
+
+/* Horizontal lines for first row */
+.excel-table th::after {
+    content: '';
+    display: block;
+    border-bottom: 3px solid rgb(0, 0, 0);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    /* Align with the bottom of the cell */
+}
+
+/* Horizontal lines for first row */
+.excel-table th::before {
+    content: '';
+    display: block;
+    border-top: 3px solid rgb(0, 0, 0);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 1px;
+    /*Align with the bottom of the cell */
+}
+
+/* Adjustments for spacing and alignment */
+.excel-table th:first-child,
+.excel-table td:first-child {
+    border-top-left-radius: 0px;
+    /* Rounded corners for the first cell */
+    border-bottom-left-radius: 0px;
+}
+
+.excel-table th:last-child,
+.excel-table td:last-child {
+    border-top-right-radius: 0px;
+    /* Rounded corners for the last cell */
+    border-bottom-right-radius: 0px;
+}
+
+/* to increase the entire row's height */
+.excel-table thead th {
+    padding-top: 20px;
+    /* Increase top padding */
+    padding-bottom: 20px;
+    /* Increase bottom padding */
+}

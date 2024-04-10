@@ -108,7 +108,6 @@ def login():
             return redirect(url_for('home'))  # Redirect back to login page to show the error message
         else:
             session['user_id'] = user['id']
-            update_target_weight_status(user['id'])
             return redirect(url_for('dashboard'))
 
     # If the method is not POST (i.e., the user is accessing the login page directly), 
@@ -122,7 +121,9 @@ def dashboard():
     if 'user_id' in session:
         try:
             user_id = session.get('user_id')
+            update_target_weight_status(user_id)
             conn = psycopg2.connect(DATABASE_URL)
+            # Get User details
             cur = conn.cursor()
             cur.execute('SELECT name FROM users WHERE id = %s', (user_id,))
             user_name_result = cur.fetchone()
@@ -131,12 +132,48 @@ def dashboard():
             user_details_list = []
             user_details_list = [list(user_details[0])]
             cur.close()
+            # Get Target weight details
+            cur = conn.cursor()
+            cur.execute("""
+            SELECT created_date, target_weight, date_of_target, status 
+            FROM target_weights 
+            WHERE user_id = %s
+            """, (user_id,))
+            target_details = cur.fetchall()
+            cur.close()
+
+            target_details_list = []
+
+            for target in target_details:
+                date_of_target = target[2]  # The target's end date
+                cur = conn.cursor()
+                cur.execute("""
+                    SELECT weight, date_of_measurement 
+                    FROM weights 
+                    WHERE user_id = %s AND date_of_measurement <= %s
+                    ORDER BY date_of_measurement DESC 
+                    LIMIT 1
+                    """, (user_id, date_of_target))
+                latest_weight = cur.fetchone()
+                cur.close()
+    
+                # If a weight record exists that meets the condition
+                if latest_weight:
+                    # Convert each target detail to list and append the formatted weight string
+                    formatted_target = list(target) + [f"{latest_weight[0]} (at {latest_weight[1].strftime('%Y-%m-%d')})"]
+                else:
+                    # If no weight was found before the target date, append a placeholder or None
+                    formatted_target = list(target) + ["No weight recorded before target end date"]
+    
+                target_details_list.append(formatted_target)
+            print(target_details_list)
             conn.close()
             number_of_rows = 5
             for _ in range(number_of_rows):
                 user_details_list.append([' ', '', '', '', ''])
+                if len(target_details_list) <= number_of_rows:
+                    target_details_list.append([' ', '', '', ''])
             
-            print(user_details_list)
             if user_name_result:
                 user_name = user_name_result[0]
                 user_message = f'Welcome, {user_name}!'
@@ -150,7 +187,7 @@ def dashboard():
         return redirect(url_for('login'))
 
     # Ensure that user_name is always defined, even if it's None, to prevent rendering issues.
-    return render_template('dashboard.html', user_name=user_name, user_message=user_message, user_details_list = user_details_list)
+    return render_template('dashboard.html', user_name=user_name, user_message=user_message, user_details_list = user_details_list, target_details_list = target_details_list)
 
 
        
@@ -353,6 +390,51 @@ def api_weight_trend():
 def plots():
     # Add any data fetching or processing here if necessary
     return render_template('plots.html')
+
+@app.route('/add_target_weight', methods=['POST'])
+def add_target_weight():
+    if 'user_id' not in session:
+        flash("Please log in to add target weight.", "info")
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    date_of_target = request.form.get('date_of_target')
+    target_weight = request.form.get('target_weight')
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor()
+
+        # Check if there's an existing target weight with 'In Progress' status
+        cur.execute("""
+            SELECT id FROM target_weights
+            WHERE user_id = %s AND status = 'In Progress'
+        """, (user_id,))
+        existing_target = cur.fetchone()
+
+        if existing_target:
+            # Update status of existing target weight to 'Interrupted'
+            cur.execute("""
+                UPDATE target_weights SET status = 'Interrupted'
+                WHERE id = %s
+            """, (existing_target[0],))
+            flash("Existing target weight has been marked as 'Interrupted'.", "warning")
+
+        # Insert the new target weight entry
+        cur.execute("""
+            INSERT INTO target_weights (user_id, date_of_target, target_weight, status)
+            VALUES (%s, %s, %s, 'In Progress')
+        """, (user_id, date_of_target, target_weight))
+        
+        conn.commit()
+        flash("New target weight added successfully!", "success")
+    except Exception as e:
+        flash(f"An error occurred: {str(e)}", "error")
+    finally:
+        cur.close()
+        conn.close()
+
+    return redirect(url_for('dashboard'))
 
 def update_target_weight_status(user_id):
     conn = psycopg2.connect(DATABASE_URL)
