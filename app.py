@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 import io
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from matplotlib.figure import Figure
+from functools import wraps
 
 
 app = Flask(__name__)
@@ -52,7 +53,6 @@ def home():
     if 'user_id' in session:
         try:
             user_id = session.get('user_id')
-            print()
             conn = psycopg2.connect(DATABASE_URL)
             cur = conn.cursor()
             cur.execute('SELECT name FROM users WHERE id = %s', (user_id,))
@@ -108,6 +108,7 @@ def login():
             return redirect(url_for('home'))  # Redirect back to login page to show the error message
         else:
             session['user_id'] = user['id']
+            session['is_admin'] = user['is_admin']
             return redirect(url_for('dashboard'))
 
     # If the method is not POST (i.e., the user is accessing the login page directly), 
@@ -115,6 +116,110 @@ def login():
     # Remove or comment out `print(session['user_id'])` since it's not safe here.
     # print(session['user_id'])
     return render_template('index.html')
+
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'is_admin' not in session or not session['is_admin']:
+            flash('Admin access required', 'error')
+            return redirect(url_for('admin_login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
+
+@app.route('/admin/users', defaults={'user_id': None})
+@app.route('/admin/users/<int:user_id>')
+@admin_required
+def admin_users(user_id):  # Add user_id as a parameter here
+    if not session.get('is_admin', False):
+        flash('Admin access required', 'error')
+        return redirect(url_for('login'))
+
+    # Initialize variables to avoid ReferenceError
+    users, user_records, target_details_list , weights = [], None, [], []
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute('SELECT * FROM users')
+        users = cur.fetchall()
+        
+        if user_id:  # Only fetch records if user_id is provided
+            cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
+            user_records = cur.fetchone()
+            print(user_records)
+            # Get Target weight details
+            cur.execute("""
+            SELECT created_date, target_weight, date_of_target, status 
+            FROM target_weights 
+            WHERE user_id = %s
+            """, (user_id,))
+            target_details = cur.fetchall()
+
+            for target in target_details:
+                date_of_target = target[2]  # The target's end date
+                cur.execute("""
+                    SELECT weight, date_of_measurement 
+                    FROM weights 
+                    WHERE user_id = %s AND date_of_measurement <= %s
+                    ORDER BY date_of_measurement DESC 
+                    LIMIT 1
+                    """, (user_id, date_of_target))
+                latest_weight = cur.fetchone()
+    
+                # If a weight record exists that meets the condition
+                if latest_weight:
+                    # Convert each target detail to list and append the formatted weight string
+                    formatted_target = list(target) + [f"{latest_weight[0]} (at {latest_weight[1].strftime('%Y-%m-%d')})"]
+                else:
+                    # If no weight was found before the target date, append a placeholder or None
+                    formatted_target = list(target) + ["No weight recorded before target end date"]
+    
+                target_details_list.append(formatted_target)
+
+            cur.execute("SELECT * FROM weights WHERE user_id = %s", (user_id,))
+            weights = cur.fetchall()
+
+        cur.close()
+    except Exception as e:
+        flash(f'Failed to fetch users: {e}', 'error')
+    finally:
+        if conn is not None:
+            conn.close()
+
+    return render_template('admin_users.html', users=users, user_records=user_records, target_weights=target_details_list, weights=weights, selected_user_id=user_id)
+
+
+
+@app.route('/admin/users/<int:user_id>/records')
+@admin_required
+def admin_user_records(user_id):
+    if 'user_id' not in session or not session.get('is_admin', False):
+        flash('Admin access required', 'error')
+        return redirect(url_for('login'))
+
+    try:
+        conn = psycopg2.connect(DATABASE_URL)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+        # Fetch user info
+        cur.execute('SELECT * FROM users WHERE id = %s', (user_id,))
+        user_info = cur.fetchone()
+
+        # Fetch target_weights
+        cur.execute('SELECT * FROM target_weights WHERE user_id = %s', (user_id,))
+        target_weights = cur.fetchall()
+
+        # Fetch weights
+        cur.execute('SELECT * FROM weights WHERE user_id = %s', (user_id,))
+        weights = cur.fetchall()
+
+        cur.close()
+        conn.close()
+    except Exception as e:
+        flash(f'Failed to fetch records: {e}', 'error')
+        user_info, target_weights, weights = None, [], []
+
+    return render_template('admin_user_records.html', user_info=user_info, target_weights=target_weights, weights=weights)
 
 @app.route('/dashboard')
 def dashboard():
@@ -182,11 +287,14 @@ def dashboard():
         except Exception as e:
             user_name = None
             user_message = f'Error fetching user information: {str(e)}'
+
+        if session.get('is_admin', True):
+            return render_template('admin_dashboard.html', user_name=user_name, user_message=user_message, user_details_list=user_details_list, target_details_list=target_details_list)
+        else:
+            # Non-admin users get the regular dashboard
+            return render_template('dashboard.html', user_name=user_name, user_message=user_message, user_details_list=user_details_list, target_details_list=target_details_list)
     else:
         return redirect(url_for('login'))
-
-    # Ensure that user_name is always defined, even if it's None, to prevent rendering issues.
-    return render_template('dashboard.html', user_name=user_name, user_message=user_message, user_details_list = user_details_list, target_details_list = target_details_list)
 
 
        

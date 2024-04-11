@@ -1,3 +1,4 @@
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,6 +14,7 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <header class="info-icons">
+    {% block admin_links %}{% endblock %}
     <a href="{{ url_for('personal_details') }}" class="info-link">
         <i class="fas fa-user"></i>
         <span>Personal Details</span>
@@ -32,7 +34,7 @@
     <a href="{{ url_for('logout') }}" class="info-link">
         <i class="fas fa-sign-out-alt"></i>
         <span>Logout</span>
-    </a>
+    </a> 
 </header>
 
 <body>
@@ -282,3 +284,4 @@
 </body>
 
 </html>
+{% endblock %}

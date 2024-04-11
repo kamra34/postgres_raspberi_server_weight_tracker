@@ -1,0 +1,16 @@
+<!-- admin_dashboard.html -->
+{% extends "dashboard.html" %}
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_dashboard.css') }}">
+</head>
+{% block admin_links %}
+    <a href="{{ url_for('admin_users') }}" class="info-link admin-link">
+        <i class="fas fa-tools"></i> 
+        <span>Admin Feature DB</span>
+    </a>
+{% endblock %}
+
+{% block content %}
+    {{ super() }}  <!-- Keep the existing content block to include the main content -->
+{% endblock %}

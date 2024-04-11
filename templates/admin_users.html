@@ -1,0 +1,140 @@
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin User Lsit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap">
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/berlin-sans-fb-demi">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin_users.css') }}" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<header class="info-icons">
+    <a href="javascript:history.back()" class="info-link">
+        <i class="fas fa-arrow-left"></i>
+        <span>Back</span>
+    </a>
+    <a href="{{ url_for('dashboard') }}" class="info-link">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+    </a>
+</header>
+
+<body>
+    <div id="adminUsers">
+        <main class="content">
+            <section class="user-table">
+                <h1>Select a User to See its Records</h1>
+                <div class="table-scroll">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Date of Birth</th>
+                                <!-- Add other user fields as needed, but exclude the password hash -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr onclick="window.location='{{ url_for('admin_users', user_id=user.id) }}';">
+                                <td>{{ user.id }}</td>
+                                <td>{{ user.name }}</td>
+                                <td>{{ user.date_of_birth }}</td>
+                                <!-- Add other user fields as needed -->
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+            <section class="user-details">
+                {% if user_records %}
+                <h2>User Details for User: {{ user_records.name }}</h2>
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>User ID</th>
+                                <th>Name</th>
+                                <th>Date of Birth</th>
+                                <th>Sex</th>
+                                <th>height</th>
+                                <th>Activity Level</th>
+                                <th>Is Admin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>{{ user_records.name }}</td>
+                                <td>{{ user_records.name }}</td>
+                                <td>{{ user_records.date_of_birth }}</td>
+                                <td>{{ user_records.sex }}</td>
+                                <td>{{ user_records.height }}</td>
+                                <td>{{ user_records.activity_level }}</td>
+                                <td>{{ user_records.is_admin }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                {% endif %}
+            </section>
+            <section class="user-weights">
+                {% if weights %}
+                <h2>weights Details for User: {{ user_records.name }}</h2>
+                <div class="table-scroll">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Measurement ID</th>
+                                <th>Date of Measurement</th>
+                                <th>Weight</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for w in weights %}
+                            <tr>
+                                <td>{{ w.id }}</td>
+                                <td>{{ w.date_of_measurement }}</td>
+                                <td>{{ w.weight }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </section>
+            <section class="user-targets">
+                {% if target_weights %}
+                <h2>Targets Details for User: {{ user_records.name }}</h2>
+                <div class="table-scroll">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Created Date</th>
+                                <th>Target Weight</th>
+                                <th>Target End</th>
+                                <th>Last Weight</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for target in target_weights %}
+                            <tr>
+                                <td>{{ target[0] or '&nbsp;' | safe }}</td> <!-- Created Date -->
+                                <td>{{ target[1] or '&nbsp;' | safe }}</td> <!-- Target Weight -->
+                                <td>{{ target[2] or '&nbsp;' | safe }}</td> <!-- Target End -->
+                                <td>{{ target[4] or '&nbsp;' | safe }}</td> <!-- last weight -->
+                                <td>{{ target[3] or '&nbsp;' | safe }}</td> <!-- Status -->
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+    {% endblock %}

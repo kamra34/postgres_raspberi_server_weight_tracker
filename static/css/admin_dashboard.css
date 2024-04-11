@@ -1,0 +1,26 @@
+.info-link.admin-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    color: #343a40; /* Dark text, adjust as needed */
+}
+
+.info-link.admin-link i {
+    background-color: rgba(198, 89, 17, 1); /* Icon background color */
+    color: #ffffff; /* Icon color */
+    border-radius: 50%; /* Makes the icon background circular */
+    padding: 10px;
+    font-size: 24px; /* Adjust icon size as needed */
+    margin-bottom: 5px; /* Space between icon and text */
+}
+
+.info-link.admin-link span {
+    font-size: 12px; /* Adjust text size as needed */
+    text-align: center;
+}
+
+/* Optionally, add hover effects */
+.info-link.admin-link:hover, .info-link.admin-link:focus {
+    background-color: #0056b3; /* Darker or lighter on hover for interaction feedback */
+}
