@@ -50,6 +50,10 @@ def home():
     # Check if user is logged in and get their name
     user_name = None
     db_message, db_status, tables = db_check(DATABASE_URL)
+    lst = []
+    number_of_rows = 40
+    for _ in range(number_of_rows):
+        lst.append(['', '', '', ''])
     if 'user_id' in session:
         try:
             user_id = session.get('user_id')
@@ -65,7 +69,7 @@ def home():
     else:
         user_message = 'Not logged in.'
     # Pass separate messages for database status and user login status to the template
-    return render_template("index.html", db_status=db_status, db_message=db_message, user_message=user_message, tables=tables, user_name=user_name)
+    return render_template("index.html", db_status=db_status, db_message=db_message, user_message=user_message, tables=tables, user_name=user_name, lst = lst)
 
 
 
@@ -87,8 +91,8 @@ def register():
             return redirect(url_for('login'))
         except Exception as e:
             flash('Registration failed: Username may already exist.', 'error')
-            return redirect(url_for('register'))
-    return render_template('register.html')
+            return redirect(url_for('home'))
+    return render_template('index.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

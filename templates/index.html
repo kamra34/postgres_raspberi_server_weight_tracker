@@ -1,247 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8" />
-    <title>App Interface</title>
+    <meta charset="UTF-8">
+    <title>User Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="preconnect" href="https://fonts.gstatic.com">
-    <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/slick.css') }}" />
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/tooplate-simply-amazed.css') }}" />
-    <style>
-        body, html {
-            height: 100%;
-            margin: 0;
-        }
-        .bg-image {
-            background-image: url("{{ url_for('static', filename='img/weight_tracker.jpg') }}");
-            height: 100vh;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-size: contain;
-            position: relative;
-        }
-        .button-container {
-            position: absolute;
-        }
-        .button-container button {
-            margin: 10px;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            background-color: white;
-            color: black;
-        }
-        .content-container {
-            display: none;
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            background-color: rgba(0,0,0,0);
-            position: absolute;
-            top: 100px;
-            left: 20px;
-            right: 20px;
-        }
-        .box-container{
-            background-color: rgba(0, 0, 0, 0.8);
-            padding: 30px;
-            border-radius: 60px;
-            color: rgb(255, 255, 255);
-            margin: 20px auto;
-            width: 810px;
-            position: absolute;
-            top: 85px;
-            left: 345px;
-        }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400&display=swap">
+    <link rel="stylesheet" href="https://fonts.cdnfonts.com/css/berlin-sans-fb-demi">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='fontawesome/css/all.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/index.css') }}" />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
+
 <body>
-<div class="bg-image">
-    <div class="container-fluid">
-        <div id="loginContainer" class="button-container">
-            <button onclick="showContent('login')">Login</button>
-        </div>
-        <div id="registerContainer" class="button-container">
-            <button onclick="showContent('register')">Register</button>
-        </div>
-        <div id="contactContainer" class="button-container">
-            <button onclick="showContent('contact')">Contact</button>
-        </div>
-        <div id="dbContainer" class="button-container">
-            <button onclick="showContent('dbStatus')">Check Database Status</button>
-        </div>
-        <div id="login" class="content-container">
-            <div class="col-md-6 justify-self-start align-self-start vertical-align-top">
-                <div class="box-container">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
+    <div id="index">
+        <main class="content">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <section class="user-table">
+                <h1>Weight in, See Trends (or not), Go out!</h1>
+                <table class="excel-table">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div id="loginContainer" class="button-container">
+                                    <button onclick="showContent('login')">Login</button>
+                                </div>
+                            </th>
+                            <th>
+                                <div id="registerContainer" class="button-container">
+                                    <button onclick="showContent('register')">Register</button>
+                                </div>
+                            </th>
+                            <th>
+                                <div id="contactContainer" class="button-container">
+                                    <button onclick="showContent('contact')">Contact</button>
+                                </div>
+                            </th>
+                            <th>
+                                <div id="dbContainer" class="button-container">
+                                    <button onclick="showContent('dbStatus')">Check Database Status</button>
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for l in lst %}
+                        <tr>
+                            <td>{{ l[0] or '&nbsp;' | safe }}</td>
+                            <td>{{ l[1] or '&nbsp;' | safe }}</td>
+                            <td>{{ l[2] or '&nbsp;' | safe }}</td>
+                            <td>{{ l[3] or '&nbsp;' | safe }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div id="login" class="content-container">
+                    <div class="col-md-6 justify-self-start align-self-start vertical-align-top">
+                        <div class="box-container">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
                             {% for category, message in messages %}
-                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
                             {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                    <!-- Login form -->
-                    <h2>Login</h2>
-                    <form action="/login" method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="form-group">
-                            <label for="loginName">Username:</label>
-                            <input type="text" class="form-control" id="loginName" name="name" required>
+                            {% endif %}
+                            {% endwith %}
+                            <!-- Login form -->
+                            <h2>Login</h2>
+                            <form action="/login" method="post">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <div class="form-group">
+                                    <label for="loginName">Username:</label>
+                                    <input type="text" class="form-control" id="loginName" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="loginPassword">Password:</label>
+                                    <input type="password" class="form-control" id="loginPassword" name="password"
+                                        required>
+                                </div>
+                                <p><button type="submit" class="btn btn-success"><i
+                                            class="fas fa-sign-in-alt"></i></button><a href="/"
+                                        class="btn btn-success"><i class="fas fa-undo"></i></a></p>
+                            </form>
                         </div>
-                        <div class="form-group">
-                            <label for="loginPassword">Password:</label>
-                            <input type="password" class="form-control" id="loginPassword" name="password" required>
-                        </div>
-                        <p><button type="submit" class="btn btn-primary">Login</button><a href="/" class="btn btn-primary">Go Back</a></p>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        </div>
-        <div id="register" class="content-container">
-            <div class="col-md-6 justify-self-start align-self-start vertical-align-top">
-                <div class="box-container">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                        {% if messages %}
+                <div id="register" class="content-container">
+                    <div class="col-md-6 justify-self-start align-self-start vertical-align-top">
+                        <div class="box-container">
+                            {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
                             {% for category, message in messages %}
-                                <div class="alert alert-{{ category }}">{{ message }}</div>
+                            <div class="alert alert-{{ category }}">{{ message }}</div>
                             {% endfor %}
-                        {% endif %}
-                    {% endwith %}
-                    <!-- Register form -->
-                    <h2>Register</h2>
-                    <form action="/register" method="post">
-                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
-                        <div class="form-group">
-                            <label for="registerName" style="color: white;">Username:</label>
-                            <input type="text" class="form-control" id="registerName" name="name" required>
+                            {% endif %}
+                            {% endwith %}
+                            <!-- Register form -->
+                            <h2>Register</h2>
+                            <form action="/register" method="post">
+                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                                <div class="form-group">
+                                    <label for="registerName" style="color: white;">Username:</label>
+                                    <input type="text" class="form-control" id="registerName" name="name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="registerPassword" style="color: white;">Password:</label>
+                                    <input type="password" class="form-control" id="registerPassword" name="password"
+                                        required>
+                                </div>
+                                <p><button type="submit" class="btn btn-success"><i
+                                            class="fas fa-registered"></i></button><a href="/"
+                                        class="btn btn-success"><i class="fas fa-undo"></i></a></p>
+                            </form>
+                            <p>Already have an account? <a href="javascript:void(0);" onclick="showContent('login')" style="color: rgba(224, 133, 121);">Login</a></p>
+                            </p>
                         </div>
-                        <div class="form-group">
-                            <label for="registerPassword" style="color: white;">Password:</label>
-                            <input type="password" class="form-control" id="registerPassword" name="password" required>
+                    </div>
+                </div>
+                <div id="contact" class="content-container">
+                    <div class="col-md-12">
+                        <div class="box-container">
+                            <!-- Enhanced Contact info -->
+                            <h2>Contact Information</h2>
+                            <div class="profile-info">
+                                <!--<img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="Profile Image" class="profile-image">-->
+                                <p class="bio">Feel free to reach out to me on GitHub or LinkedIn or drop me an email!
+                                </p>
+                            </div>
+                            <div class="contact-links">
+                                <a href="https://github.com/kamra34/" target="_blank" class="contact-link">
+                                    <i class="fab fa-github"></i> GitHub
+                                </a>
+                                <br>
+                                <br>
+                                <a href="https://www.linkedin.com/in/kamiarradnosrati/" target="_blank"
+                                    class="contact-link">
+                                    <i class="fab fa-linkedin"></i> LinkedIn
+                                </a>
+                                <br>
+                                <br>
+                                <!-- Example email link; ensure to protect against spam bots if using a direct email link -->
+                                <a href="mailto:your.email@example.com" class="contact-link">
+                                    <i class="fas fa-envelope"></i> Email Me
+                                </a>
+                                <br>
+                                <br>
+                            </div>
+                            <a href="/" class="btn btn-success"><i class="fas fa-undo"></i></a>
                         </div>
-                        <p><button type="submit" class="btn btn-primary">Register</button><a href="/" class="btn btn-primary">Go Back</a></p>
-                    </form>
-                    <p>Already have an account? <a href="/login" style="color: rgba(224, 133, 121);">Login</a></p>
-                </div>
-            </div>           
-        </div>
-        <div id="contact" class="content-container">
-            <div class="col-md-12">
-                <div class="box-container">
-                    <!-- Enhanced Contact info -->
-                    <h2>Contact Information</h2>
-                    <div class="profile-info">
-                        <!--<img src="{{ url_for('static', filename='img/profile.jpg') }}" alt="Profile Image" class="profile-image">-->
-                        <p class="bio">Feel free to reach out to me on GitHub or LinkedIn or drop me an email!</p>
                     </div>
-                    <div class="contact-links">
-                        <a href="https://github.com/kamra34/" target="_blank" class="contact-link">
-                            <i class="fab fa-github"></i> GitHub
-                        </a>
-                        <br>
-                        <br>
-                        <a href="https://www.linkedin.com/in/kamiarradnosrati/" target="_blank" class="contact-link">
-                            <i class="fab fa-linkedin"></i> LinkedIn
-                        </a>
-                        <br>
-                        <br>
-                        <!-- Example email link; ensure to protect against spam bots if using a direct email link -->
-                        <a href="mailto:your.email@example.com" class="contact-link">
-                            <i class="fas fa-envelope"></i> Email Me
-                        </a>
-                        <br>
-                        <br>
+                </div>
+                <div id="dbStatus" class="content-container">
+                    <div class="col-md-12">
+                        <div class="box-container">
+                            <!-- Database status content with improved visualization -->
+                            <h2>Database Status</h2>
+                            {% if db_status == 'up' %}
+                            <p><i class="fas fa-database" style="font-size:26px;color: #28a745"></i> Database is up and
+                                running.</p>
+                            <h3>Available Tables</h3>
+                            {% if tables|length > 0 %}
+                            <table class="table table-dark table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Table Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for table in tables %}
+                                    <tr>
+                                        <td>{{ table }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                            {% else %}
+                            <p>No tables available.</p>
+                            {% endif %}
+                            {% else %}
+                            <p><i class="fas fa-database" style="font-size:26px;color: #dc3545"></i> Database connection
+                                failed.</p>
+                            {% endif %}
+                            <a href="/" class="btn btn-success"><i class="fas fa-undo"></i></a>
+                        </div>
                     </div>
-                    <a href="/" class="btn btn-primary">Go Back</a>
                 </div>
-            </div>
-        </div>        
-        <div id="dbStatus" class="content-container">
-            <div class="col-md-12">
-                <div class="box-container">
-                    <!-- Database status content with improved visualization -->
-                    <h2>Database Status</h2>
-                    {% if db_status == 'up' %}
-                        <p><i class="fas fa-database" style="font-size:26px;color: #28a745"></i> Database is up and running.</p>
-                        <h3>Available Tables</h3>
-                        {% if tables|length > 0 %}
-                        <table class="table table-dark table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Table Name</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for table in tables %}
-                                <tr>
-                                    <td>{{ table }}</td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                        {% else %}
-                        <p>No tables available.</p>
-                        {% endif %}
-                    {% else %}
-                        <p><i class="fas fa-database" style="font-size:26px;color: #dc3545"></i> Database connection failed.</p>
-                    {% endif %}
-                    <a href="/" class="btn btn-primary">Go Back</a>
-                </div>
-            </div>  
-        </div>        
+            </section>
+        </main>
     </div>
-</div>
-<script>
-    function showContent(id) {
-        const contents = document.querySelectorAll('.content-container');
-        contents.forEach(content => content.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-    }
+    <script>
+        function showContent(id) {
+            // Hide all content containers first
+            const contents = document.querySelectorAll('.content-container');
+            contents.forEach(content => {
+                content.style.display = 'none';
+            });
 
-    function moveButton(id) {
-        const container = document.getElementById(id);
-        if(id === "loginContainer") {
-            container.style.top = "90px";
-            container.style.left = "350px";
-            container.style.right = "";
-            container.style.bottom = "";
-        } else if(id === "registerContainer") {
-            container.style.top = "90px";
-            container.style.left = "475px";
-            container.style.right = "";
-            container.style.bottom = "";
-        } else if(id === "contactContainer") {
-            container.style.top = "90px";
-            container.style.left = "660px";
-            container.style.right = "";
-            container.style.bottom = "";
-        } else if(id === "dbContainer") {
-            container.style.top = "90px";
-            container.style.left = "900px";}
-            container.style.right = "";
-            container.style.bottom = "";
+            // Show the selected content container
+            const selectedContent = document.getElementById(id);
+            selectedContent.style.display = 'block'; // Or toggle with 'block'/'none'
         }
-
-    // Example usage: move each button to a different corner
-    moveButton('loginContainer');
-    moveButton('registerContainer');
-    moveButton('contactContainer');
-    moveButton('dbContainer');
-</script>
-<script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
-<script src="{{ url_for('static', filename='js/slick.js') }}"></script>
-<script src="{{ url_for('static', filename='js/templatemo-script.js') }}"></script>
-
-<script>
-    $(document).ready(function() {
-        // Additional JavaScript for UI enhancements can go here
-    });
-</script>
+    </script>
 </body>
+
 </html>

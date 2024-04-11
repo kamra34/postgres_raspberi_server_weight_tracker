@@ -1,0 +1,252 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    font-family: 'Source Sans Pro', sans-serif;
+}
+#index {
+    display: flex;
+    height: 100%;
+}
+
+.content {
+    flex: 1;
+    padding: 20px;
+    overflow-y: auto; /* Add scrolling for content */
+    width: 50%;
+    text-align: center;
+}
+
+.button-container {
+    background: none; /* Remove any background */
+    border: none; /* Remove any border */
+    font-weight: bold;
+}
+
+.button-container button {
+    background: transparent; /* Make button background transparent */
+    border: none; /* Remove button border */
+    color: inherit; /* Use text color inherited from the parent, adjust as needed */
+    cursor: pointer; /* Change cursor to pointer to indicate clickability */
+    padding: 10px; /* Adjust padding as needed */
+    font-weight: bold;
+}
+
+/* Optionally, add hover effect to button for better user interaction */
+.button-container button:hover {
+    background-color: rgba(255, 255, 255, 0.2); /* Slightly highlighted background on hover */
+}
+
+.content-container {
+    display: none;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: rgba(0,0,0,0);
+    position: absolute;
+    width: 50%;
+    top: 100px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.box-container{
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 30px;
+    border-radius: 60px;
+    color: rgb(255, 255, 255);
+    margin: 20px auto;
+    width: 90%;
+    position: absolute;
+    top: 85px;
+    margin-left: 48%;
+    margin-right: 59%;
+}
+
+
+h1 {
+    color: rgba(198, 89, 17, 1);
+    font-family: 'Berlin Sans FB Demi', sans-serif;
+    font-weight: 900;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.excel-table {
+    border-collapse: collapse;
+    /* Adjust for spacing between rows */
+    border-spacing: 0 0;
+    /* Horizontal and vertical spacing */
+    width: 50%;
+    background-color: #fff;
+    margin: 0 auto;
+    text-align: center;
+    align-items: center;
+    position: relative;
+    /* Adjust spacing from other elements */
+}
+
+.excel-table th,
+.excel-table td {
+    border-right: none;
+    /* Remove right border */
+    border-left: none;
+    /* Remove left border */
+    padding: 2px;
+    text-align: center;
+    background-color: #f9f9f9;
+    /* Row background */
+}
+
+.excel-table th {
+    background-color: #ffffff;
+    /* Header background */
+    color: rgb(0, 0, 0);
+    position: sticky;
+    top: 0;
+    /* Stick to top when you scroll */
+}
+
+.excel-table tbody tr {
+    /*box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);*/
+    /* Row shadow for depth */
+    border-bottom: 2px solid #ddd;
+    /* Add only bottom border to create horizontal lines */
+}
+
+/* Add vertical borders between cells but not on the outer edges */
+.excel-table th,
+.excel-table td {
+    border-right: 2px solid #ddd;
+    border-left: 2px solid #ddd;
+}
+
+/*.excel-table th:last-child,
+.excel-table td:last-child {
+    border-right: none;/* Remove the right border for the last cell }*/
+
+
+.excel-table td {
+    background-color: #ffffff;
+}
+
+/* Horizontal lines for first row */
+.excel-table th::after {
+    content: '';
+    display: block;
+    border-bottom: 3px solid rgb(0, 0, 0);
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    /* Align with the bottom of the cell */
+}
+
+/* Horizontal lines for first row */
+.excel-table th::before {
+    content: '';
+    display: block;
+    border-top: 3px solid rgb(0, 0, 0);
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 1px;
+    /*Align with the bottom of the cell */
+}
+
+/* Adjustments for spacing and alignment */
+.excel-table th:first-child,
+.excel-table td:first-child {
+    border-top-left-radius: 0px;
+    /* Rounded corners for the first cell */
+    border-bottom-left-radius: 0px;
+}
+
+.excel-table th:last-child,
+.excel-table td:last-child {
+    border-top-right-radius: 0px;
+    /* Rounded corners for the last cell */
+    border-bottom-right-radius: 0px;
+}
+
+/* to increase the entire row's height */
+.excel-table thead th {
+    padding-top: 20px;
+    /* Increase top padding */
+    padding-bottom: 20px;
+    /* Increase bottom padding */
+}
+/* Adjustments for buttons to match your theme */
+.btn-primary {
+    background-color: #007bff;
+    /* Example primary color */
+    border: none;
+    /* Remove default border */
+    padding: 10px 20px;
+    /* Padding for larger click area */
+    border-radius: 5px;
+    /* Rounded corners */
+    color: white;
+    /* Text color */
+    cursor: pointer;
+    /* Cursor indicates clickable */
+}
+
+.btn-danger,
+.btn-success,
+.btn-back {
+    /* Common styles for both buttons */
+    color: white;
+    /* Text color */
+    padding: 5px;
+    /* Adjust padding as needed */
+    border-radius: 50%;
+    /* Make it circular */
+    text-align: center;
+    /* Center the text/icon inside the button */
+    display: inline-block;
+    /* Allows setting width and height */
+    font-size: 22px;
+    /* Adjust font size as needed */
+    line-height: 1;
+    /* Adjust line height to vertically center text if necessary */
+    width: 65px;
+    /* Width of the button */
+    height: 50px;
+    /* Height of the button */
+    border: none;
+    /* Remove border */
+    display: inline-flex;
+    /* Use flexbox for easier centering */
+    justify-content: center;
+    /* Center content horizontally in the flex container */
+    align-items: center;
+    /* Center content vertically in the flex container */
+    margin-top: 10px;
+}
+
+.btn-danger {
+    background-color: rgb(248, 15, 15);
+    /* Red color for danger actions */
+    line-height: 1.7;
+}
+
+.btn-success {
+    background-color: rgba(198, 89, 17, 1);
+    /* Green color for success actions */
+}
+
+.btn-back {
+    background-color: rgba(198, 89, 17, 1);
+    /* Red color for danger actions */
+    line-height: 1.7;
+    width: 50px;
+    /* Width of the button */
+    height: 50px;
+}
+
+.btn-primary:hover,
+.btn-danger:hover,
+.btn-success:hover,
+.btn-back:hover {
+    opacity: 0.8;
+}
