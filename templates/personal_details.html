@@ -41,97 +41,87 @@
         <span>Logout</span>
     </a>
 </header>
+
 <body>
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="p-info">
-                    <h2>Personal Information</h2>
-                </div>
-            </div>
-        </div>
+    <div id="personal">
+        <main class="content">
+            <section class="edit-table">
+                <h1>Edit Personal Information</h1>
+                <form id="personalDetailsForm" action="{{ url_for('personal_details') }}" method="POST">
+                    <table class="excel-table">
+                        <thead>
+                            <tr>
+                                <th>Field</th>
+                                <th>Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Name</td>
+                                <td>
+                                    <input type="text" name="name" value="{{ user_details.name }}" class="form-control"
+                                        style="text-align: center;">
+                                </td>
+                            </tr>
+                            <!-- Other fields remain the same -->
+                            <tr>
+                                <td>Height (cm)</td>
+                                <td>
+                                    <input type="number" name="height" value="{{ user_details.height }}"
+                                        class="form-control" style="text-align: center;">
+                                </td>
+                            </tr>
 
-        <div class="table-container">
-            <form id="personalDetailsForm" action="{{ url_for('personal_details') }}" method="POST">
-                <table class="table excel-table">
-                    <thead>
-                        <tr>
-                            <th>Field</th>
-                            <th>Value</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>Name</td>
-                            <td>
-                                <input type="text" name="name" value="{{ user_details.name }}" class="form-control"
-                                    style="text-align: center;">
-                            </td>
-                        </tr>
-                        <!-- Other fields remain the same -->
-                        <tr>
-                            <td>Height (cm)</td>
-                            <td>
-                                <input type="number" name="height" value="{{ user_details.height }}"
-                                    class="form-control" style="text-align: center;">
-                            </td>
-                        </tr>
-
-                        <!-- Date input -->
-                        <tr>
-                            <td>Date of Birth </td>
-                            <td contenteditable="false" data-field="dob">
-                                <input type="date" name="dob" value="{{ user_details.date_of_birth }}"
-                                    class="form-control">
-                            </td>
-                        </tr>
-                        <!-- Dropdown for Sex -->
-                        <tr>
-                            <td>Sex</td>
-                            <td>
-                                <select name="sex" class="form-control">
-                                    <option value="Male" {{ 'selected' if user_details.sex=='Male' else '' }}>Male
-                                    </option>
-                                    <option value="Female" {{ 'selected' if user_details.sex=='Female' else '' }}>
-                                        Female</option>
-                                    <option value="Other" {{ 'selected' if user_details.sex=='Other' else '' }}>
-                                        Other</option>
-                                </select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Activity Level</td>
-                            <td>
-                                <select name="activity_level" class="form-control">
-                                    <option value="None" {{ 'selected' if user_details.activity_level=='None' else ''
-                                        }}>None</option>
-                                    <option value="Low" {{ 'selected' if user_details.activity_level=='Low' else '' }}>
-                                        Low</option>
-                                    <option value="Medium" {{ 'selected' if user_details.activity_level=='Medium'
-                                        else '' }}>Medium</option>
-                                    <option value="High" {{ 'selected' if user_details.activity_level=='High' else ''
-                                        }}>High</option>
-                                </select>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <td>
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                    <button type="submit" class="btn btn-success btn-sm save-btn"><i class="fas fa-save"></i></button>
-                    <!-- Change the button to an anchor tag -->
-                    <a href="/dashboard" class="btn btn-danger btn-sm">
-                        <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                    </a>
-                </td>
-
-            </form>
-
-        </div>
-
-
+                            <!-- Date input -->
+                            <tr>
+                                <td>Date of Birth </td>
+                                <td contenteditable="false" data-field="dob">
+                                    <input type="date" name="dob" value="{{ user_details.date_of_birth }}"
+                                        class="form-control">
+                                </td>
+                            </tr>
+                            <!-- Dropdown for Sex -->
+                            <tr>
+                                <td>Sex</td>
+                                <td>
+                                    <select name="sex" class="form-control">
+                                        <option value="Male" {{ 'selected' if user_details.sex=='Male' else '' }}>Male
+                                        </option>
+                                        <option value="Female" {{ 'selected' if user_details.sex=='Female' else '' }}>
+                                            Female</option>
+                                        <option value="Other" {{ 'selected' if user_details.sex=='Other' else '' }}>
+                                            Other</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Activity Level</td>
+                                <td>
+                                    <select name="activity_level" class="form-control">
+                                        <option value="None" {{ 'selected' if user_details.activity_level=='None'
+                                            else '' }}>
+                                            None</option>
+                                        <option value="Low" {{ 'selected' if user_details.activity_level=='Low' else ''
+                                            }}>
+                                            Low</option>
+                                        <option value="Medium" {{ 'selected' if user_details.activity_level=='Medium'
+                                            else '' }}>Medium</option>
+                                        <option value="High" {{ 'selected' if user_details.activity_level=='High'
+                                            else '' }}>
+                                            High</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <td>
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                        <button type="submit" class="btn btn-success btn-sm save-btn"><i class="fas fa-save"></i></button>
+                    </td>
+                </form>
+            </section>
+        </main>
     </div>
-
     <!-- JavaScript for Bootstrap and other libraries -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
@@ -144,6 +134,7 @@
                 const heightTd = document.querySelector('[data-field="height"]');
                 document.querySelector('input[name="name"]').value = nameTd.textContent;
                 document.querySelector('input[name="height"]').value = heightTd.textContent;
+                window.location.reload(); // Refresh the page to show the new weight entry
             });
         });
     </script>
