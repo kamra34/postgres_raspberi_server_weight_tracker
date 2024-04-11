@@ -166,7 +166,6 @@ def dashboard():
                     formatted_target = list(target) + ["No weight recorded before target end date"]
     
                 target_details_list.append(formatted_target)
-            print(target_details_list)
             conn.close()
             number_of_rows = 5
             for _ in range(number_of_rows):
@@ -391,6 +390,54 @@ def plots():
     # Add any data fetching or processing here if necessary
     return render_template('plots.html')
 
+@app.route('/targets', methods=['GET'])
+def get_targets():
+    if 'user_id' not in session:
+        # Redirect to login page if user is not logged in
+        return redirect(url_for('login'))
+    
+    user_id = session['user_id']
+    conn = psycopg2.connect(DATABASE_URL)
+    # Get Target weight details
+    cur = conn.cursor()
+    cur.execute("""
+    SELECT id, created_date, target_weight, date_of_target, status 
+    FROM target_weights 
+    WHERE user_id = %s
+    ORDER BY created_date DESC
+    """, (user_id,))
+    target_details = cur.fetchall()
+    cur.close()
+
+    target_details_list = []
+
+    for target in target_details:
+        date_of_target = target[3]  # The target's end date
+        cur = conn.cursor()
+        cur.execute("""
+            SELECT weight, date_of_measurement 
+            FROM weights 
+            WHERE user_id = %s AND date_of_measurement <= %s
+            ORDER BY date_of_measurement DESC 
+            LIMIT 1
+            """, (user_id, date_of_target))
+        latest_weight = cur.fetchone()
+        cur.close()
+    
+        # If a weight record exists that meets the condition
+        if latest_weight:
+            # Convert each target detail to list and append the formatted weight string
+            formatted_target = list(target) + [f"{latest_weight[0]} (at {latest_weight[1].strftime('%Y-%m-%d')})"]
+        else:
+            # If no weight was found before the target date, append a placeholder or None
+            formatted_target = list(target) + ["No weight recorded before target end date"]
+    
+        target_details_list.append(formatted_target)
+    conn.close()
+    print(target_details_list)
+    return render_template("target_registry.html", target_details_list=target_details_list)
+
+
 @app.route('/add_target_weight', methods=['POST'])
 def add_target_weight():
     if 'user_id' not in session:
@@ -435,6 +482,20 @@ def add_target_weight():
         conn.close()
 
     return redirect(url_for('dashboard'))
+
+@app.route('/delete_target/<int:target_id>')
+def delete_target(target_id):
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    
+    conn = psycopg2.connect(DATABASE_URL)
+    cur = conn.cursor()
+    cur.execute('DELETE FROM target_weights WHERE id = %s AND user_id = %s', (target_id, session['user_id']))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    return redirect(url_for('get_targets'))
 
 def update_target_weight_status(user_id):
     conn = psycopg2.connect(DATABASE_URL)
