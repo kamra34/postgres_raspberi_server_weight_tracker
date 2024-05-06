@@ -1,4 +1,5 @@
 .venv
+venv
 __pycache__
 config.py
 add_columns_to*
