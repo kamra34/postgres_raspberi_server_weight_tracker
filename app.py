@@ -3,6 +3,7 @@ from flask_wtf.csrf import CSRFProtect
 from flask_bcrypt import Bcrypt
 from datetime import datetime
 import psycopg2
+from psycopg2 import IntegrityError
 import psycopg2.extras
 import os
 #from dotenv import load_dotenv
@@ -62,7 +63,6 @@ def home():
     return render_template("index.html", db_status=db_status, db_message=db_message, user_message=user_message, tables=tables, user_name=user_name, lst = lst)
 
 
-
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -72,17 +72,23 @@ def register():
             password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
 
             # Insert the new user into the database
-            conn = psycopg2.connect(DATABASE_URL)
+            conn = psycopg2.connect('your_database_url')
             cur = conn.cursor()
             cur.execute('INSERT INTO users (name, password_hash) VALUES (%s, %s)', (name, password_hash))
             conn.commit()
             cur.close()
             conn.close()
             return redirect(url_for('login'))
+        except IntegrityError as ie:
+            # This block catches unique constraint errors
+            flash('Registration failed: Username already exists.', 'error')
+            return redirect(url_for('register'))
         except Exception as e:
-            flash('Registration failed: Username may already exist.', 'error')
-            return redirect(url_for('home'))
+            # Generic error handling
+            flash('Registration failed due to an unexpected error.', 'error')
+            return redirect(url_for('register'))
     return render_template('index.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
