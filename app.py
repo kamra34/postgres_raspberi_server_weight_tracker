@@ -230,7 +230,8 @@ def dashboard():
     if 'user_id' in session:
         try:
             user_id = session.get('user_id')
-            update_target_weight_status(user_id)
+            print("user ID is: ", user_id)
+            #update_target_weight_status(user_id)
             conn = psycopg2.connect(DATABASE_URL)
             # Get User details
             cur = conn.cursor()
@@ -238,6 +239,7 @@ def dashboard():
             user_name_result = cur.fetchone()
             cur.execute("SELECT name, date_of_birth, sex, activity_level, height FROM users WHERE id = %s", (user_id,))
             user_details = cur.fetchall()
+            print("user details are:", user_details)
             user_details_list = []
             user_details_list = [list(user_details[0])]
             cur.close()
