@@ -16,17 +16,7 @@ app = Flask(__name__)
 bcrypt = Bcrypt(app)
 app.config['SECRET_KEY'] = 'ReeRa'  
 csrf = CSRFProtect(app)
-if 'PYTHONANYWHERE_DOMAIN' in os.environ:
-    load_dotenv()
-    DATABASE_URL = "dbname={databasename} user = {username} host = {hostname} password = {password} port = {portnumber}".format(
-    username=os.environ.get("DB_USERNAME"),
-    password=os.environ.get("DB_PASSWORD"),
-    hostname=os.environ.get("DB_HOSTNAME"),
-    databasename=os.environ.get("DB_NAME"),
-    portnumber=os.environ.get("PORT_NUMBER"),
-    )
-else:
-    from config import DATABASE_URL
+from config import DATABASE_URL
 
 def db_check(DATABASE_URL):
     # Attempt to connect to the database and fetch table names
@@ -150,7 +140,6 @@ def admin_users(user_id):  # Add user_id as a parameter here
         if user_id:  # Only fetch records if user_id is provided
             cur.execute("SELECT * FROM users WHERE id = %s", (user_id,))
             user_records = cur.fetchone()
-            print(user_records)
             # Get Target weight details
             cur.execute("""
             SELECT created_date, target_weight, date_of_target, status 
@@ -230,8 +219,7 @@ def dashboard():
     if 'user_id' in session:
         try:
             user_id = session.get('user_id')
-            print("user ID is: ", user_id)
-            #update_target_weight_status(user_id)
+            update_target_weight_status(user_id)
             conn = psycopg2.connect(DATABASE_URL)
             # Get User details
             cur = conn.cursor()
@@ -239,7 +227,6 @@ def dashboard():
             user_name_result = cur.fetchone()
             cur.execute("SELECT name, date_of_birth, sex, activity_level, height FROM users WHERE id = %s", (user_id,))
             user_details = cur.fetchall()
-            print("user details are:", user_details)
             user_details_list = []
             user_details_list = [list(user_details[0])]
             cur.close()
@@ -373,7 +360,6 @@ def get_weights():
     # Modify the query to filter weights by the logged-in user's ID
     cur.execute('SELECT * FROM weights WHERE user_id = %s ORDER BY date_of_measurement DESC', (user_id,))
     weights = cur.fetchall()
-    print(weights)
     cur.close()
     conn.close()
 
@@ -548,7 +534,6 @@ def get_targets():
     
         target_details_list.append(formatted_target)
     conn.close()
-    print(target_details_list)
     return render_template("target_registry.html", target_details_list=target_details_list)
 
 
