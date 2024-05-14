@@ -518,8 +518,8 @@
             fetch('/api/weight_trend')
                 .then(response => response.json())
                 .then(data => {
-                    var xValues = data.dates;
-                    var yValues = data.weights;
+                    var xValues = data.dates.reverse();
+                    var yValues = data.weights.reverse();
                     var maxWeight = Math.max(...yValues) + 5;
 
                     var markers = {
@@ -530,7 +530,10 @@
 
                     // Determine color and symbol for each point based on weight gain or loss
                     for (let i = 0; i < yValues.length; i++) {
-                        if (i === 0 || yValues[i] > yValues[i - 1]) {
+                        if (i === 0) {
+                            markers.color.push('grey'); // Default color for the first point
+                            markers.symbol.push('circle'); // Default symbol for the first point
+                        } else if (yValues[i] > yValues[i - 1]) {
                             markers.color.push('red'); // Weight gain
                             markers.symbol.push('triangle-up');
                         } else {
