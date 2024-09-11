@@ -41,25 +41,53 @@
 </header>
 
 <body>
-    <div class ="container">
+    <div class="container">
         <div class="row">
+            <!-- Velocity Gauge -->
             <div class="col-md-6">
                 <h1>Velocity</h1>
-                <div id="gaugeChart"
-                    style="width:100%; max-width:650px; height:100%; max-height:450px; background-color: #ffffff; padding: 2px; border-radius: 5px; box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);">
+                <div id="gaugeChartContainer" class="chart-container">
+                    <div id="gaugeChart"></div>
+                    <!-- Info Circle Icon -->
+                    <div id="infoCircle">!</div>
+                    <!-- Modal/Popup for Measurements -->
+                    <div id="measurementModal" class="modal">
+                        <div class="modal-content">
+                            <span class="close">&times;</span>
+                            <h4>Measurements Used for Gauge and BMI Calculation</h4>
+                            <table id="usedMeasurementsTable" class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Date</th>
+                                        <th>Weight (kg)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Content will be inserted dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
+
             </div>
+
+            <!-- BMI Chart -->
             <div class="col-md-6">
                 <h1>BMI</h1>
-                <div id="bmiChart"
-                    style="width:100%; max-width:650px; height:100%; max-height:450px; background-color: #ffffff; padding: 2px; border-radius: 5px; box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.5);">
+                <div id="bmiChartContainer" class="chart-container">
+                    <div id="bmiChart"></div>
                 </div>
             </div>
         </div>
+
+        <!-- Weight Trend and Measurements -->
         <div class="row">
             <div class="col-md-6">
                 <h1>Weight Trend</h1>
-                <div id="weightTrendPlot"></div>
+                <div id="weightTrendPlotContainer" class="chart-container">
+                    <div id="weightTrendPlot"></div>
+                </div>
             </div>
             <div class="col-md-6">
                 <h1>Measurements</h1>
@@ -78,6 +106,10 @@
                 </div>
             </div>
         </div>
+
+
+
+        <!-- Back Button -->
         <div class="container">
             <a href="/dashboard" class="btn btn-primary mt-4">Go Back</a>
         </div>
@@ -101,19 +133,215 @@
                     document.getElementById('weightData').innerHTML = tableHtml;
 
                     if (dates.length > 1 && weights.length > 1) {
-                        const firstDate = dates[0];
-                        const lastDate = dates[dates.length - 1];
-                        const firstWeight = weights[0];
-                        const lastWeight = weights[weights.length - 1];
-                        const daysBetween = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
-                        const weightChange = lastWeight - firstWeight;
-                        weightChangePerMonth = (weightChange / daysBetween) * 30;
+                        // Step 1: Find the most recent measurement date (last entry in the array)
+                        const lastDate = stripTime(new Date(dates[0]));  // Most recent measurement, stripping time
+
+                        // Step 2: Define the sliding window (30 days back from the latest measurement)
+                        const windowStart = new Date(lastDate);  // Start from the latest measurement date
+                        windowStart.setDate(lastDate.getDate() - 30);  // Go back 30 days
+
+                        console.log("Window start:", windowStart);
+                        console.log("Most recent date:", lastDate);
+
+                        // Step 3: Filter the weights and dates arrays for the 30-day window before the most recent measurement
+                        const filteredData = dates.reduce((acc, date, index) => {
+                            const currentDate = stripTime(date);  // Strip time for accurate comparison
+                            if (currentDate >= windowStart && currentDate <= lastDate) {
+                                acc.dates.push(currentDate);
+                                acc.weights.push(weights[index]);
+                            }
+                            return acc;
+                        }, { dates: [], weights: [] });
+
+                        console.log("Filtered dates:", filteredData.dates);
+                        console.log("Filtered weights:", filteredData.weights);
+
+                        // Step 4: Ensure there are enough filtered measurements to perform calculations
+                        if (filteredData.dates.length > 1) {
+                            // Calculate weight change based on filtered data
+                            const firstDate = filteredData.dates[filteredData.weights.length - 1];
+                            console.log("firstDate:", firstDate);
+                            const firstWeight = filteredData.weights[filteredData.weights.length - 1];
+                            console.log("firstWeight:", firstWeight);
+                            const lastWeight = filteredData.weights[0];
+                            console.log("lastWeight:", lastWeight);
+                            const daysBetween = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
+                            console.log("daysBetween:", daysBetween);// Convert milliseconds to days
+                            const weightChange = lastWeight - firstWeight;
+                            console.log("weightChange:", weightChange);
+                            if (daysBetween > 0) {
+                                weightChangePerMonth = (weightChange / daysBetween) * 30; // Scale to per month
+                            } else {
+                                weightChangePerMonth = 0; // Handle the case when there is no time difference
+                                console.error('Not enough time difference between measurements.');
+                            }; // Scale to per month
+                            console.log("weightChangePerMonth:", weightChangePerMonth);
+                            // Step 5: Update the gauge with the calculated weight change
+                            updateGauge(weightChangePerMonth);
+
+                            // Step 6: Store filtered data for the modal
+                            storeMeasurementsForModal(filteredData);
+                        } else {
+                            console.error('Not enough data within the 30 days before the last measurement.');
+                            document.getElementById('gaugeChart').innerHTML = '<p>Not enough data for the last 30 days</p>';
+                        }
                     } else {
                         console.error('Not enough data to calculate weight change per month.');
+                        document.getElementById('gaugeChart').innerHTML = '<p>Not enough data available</p>';
                     }
                 })
                 .catch(error => console.error('Error:', error));
+
+            // Helper function to remove time from a Date object (set hours, minutes, and seconds to 0)
+            function stripTime(date) {
+                return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            }
+
+            function storeMeasurementsForModal(filteredData) {
+                const modalTable = document.getElementById('usedMeasurementsTable').getElementsByTagName('tbody')[0];
+                modalTable.innerHTML = ''; // Clear previous content
+
+                filteredData.dates.forEach((date, index) => {
+                    const row = modalTable.insertRow();
+                    const cellDate = row.insertCell(0);
+                    const cellWeight = row.insertCell(1);
+
+                    // Manually format the date as YYYY-MM-DD
+                    const year = date.getFullYear();
+                    const month = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed, so we add 1
+                    const day = String(date.getDate()).padStart(2, '0');
+                    cellDate.textContent = `${year}-${month}-${day}`; // Format date as YYYY-MM-DD
+
+                    cellWeight.textContent = filteredData.weights[index].toFixed(1); // Format weight
+                });
+            }
+
+            // Modal logic
+            const modal = document.getElementById('measurementModal');
+            const span = document.getElementsByClassName('close')[0];
+
+            // When the user clicks on <span> (x), close the modal
+            span.onclick = function () {
+                modal.style.display = 'none';
+            }
+
+            // When the user clicks anywhere outside of the modal, close it
+            window.onclick = function (event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
         });
+
+        // Function to update the gauge and add the "!" button
+        function updateGauge(weightChangePerMonth) {
+            var gaugeEndColor = weightChangePerMonth < 0 ? 'green' : 'red';
+
+            // Create an array of steps for the gauge, where it's cyan from -10 to 0 and royal blue from 0 to 10.
+            var stepsArray = [
+                { range: [-10, 0], color: 'cyan' },
+                { range: [0, 10], color: 'royalblue' }
+            ];
+
+            // Insert the active step based on the weight change.
+            if (weightChangePerMonth < 0) {
+                // Insert a green step from 0 to the negative value.
+                stepsArray.push({ range: [weightChangePerMonth, 0], color: 'rgba(56, 100, 58, 0.6)' });
+            } else {
+                // Insert a red step from 0 to the positive value.
+                stepsArray.push({ range: [0, weightChangePerMonth], color: 'red' });
+            }
+
+            var gaugeDepth = 10; // Adjust this to change the "depth" of the 3D effect
+            var shadowSteps = [];
+            for (var i = 0; i < gaugeDepth; i++) {
+                shadowSteps.push({
+                    range: [-10 + i, 10 - i],
+                    color: `rgba(200, 200, 200, ${1 - i / gaugeDepth})`,
+                    thickness: 0.01 // This ensures that each step is visible
+                });
+            }
+
+            var data = [
+                {
+                    type: 'indicator',
+                    mode: 'gauge+number',
+                    value: weightChangePerMonth,
+                    number: {
+                        suffix: ' kg/m',
+                        font: {
+                            family: 'Arial, sans-serif',
+                            size: 20,
+                            color: 'green'
+                        }
+                    },
+                    title: {
+                        text: '',
+                        font: {
+                            size: 24,
+                            color: 'blue'
+                        }
+                    },
+                    gauge: {
+                        axis: {
+                            range: [-10, 10],
+                            tickwidth: 1,
+                            tickcolor: 'darkblue',
+                            dtick: 2
+                        },
+                        bar: { color: 'rgba(0,0,0,0)' },
+                        bgcolor: 'white',
+                        borderwidth: 2,
+                        bordercolor: 'gray',
+                        steps: shadowSteps.concat(stepsArray),
+                        threshold: {
+                            line: { color: gaugeEndColor, width: 5 },
+                            thickness: 0.9,
+                            value: weightChangePerMonth
+                        }
+                    }
+                }
+            ];
+
+            var layout = {
+                autosize: true,  // Automatically size based on container
+                margin: { t: 0, r: 25, l: 25, b: 0 },
+                paper_bgcolor: 'white',
+                font: { color: 'darkblue', family: 'Arial' },
+                responsive: true  // Ensures responsiveness
+            };
+
+            Plotly.newPlot('gaugeChart', data, { responsive: true });
+
+
+            Plotly.newPlot('gaugeChart', data, { responsive: true }).then(function () {
+                // Add the "!" circle inside the top-left corner of the gauge chart
+                var chartDiv = document.getElementById('gaugeChart');
+                var infoButton = document.createElement('div');
+                infoButton.style.position = 'absolute';
+                infoButton.style.top = '20px';
+                infoButton.style.left = '20px';
+                infoButton.style.width = '30px';
+                infoButton.style.height = '30px';
+                infoButton.style.backgroundColor = '#ffcc00';
+                infoButton.style.borderRadius = '50%';
+                infoButton.style.display = 'flex';
+                infoButton.style.justifyContent = 'center';
+                infoButton.style.alignItems = 'center';
+                infoButton.style.cursor = 'pointer';
+                infoButton.style.zIndex = '1000';
+
+                // Add "!" text inside the circle
+                infoButton.innerHTML = '<span style="font-size: 18px; font-weight: bold; color: #000;">!</span>';
+                chartDiv.appendChild(infoButton);
+
+                // Show modal when the "!" button is clicked
+                infoButton.onclick = function () {
+                    const modal = document.getElementById('measurementModal');
+                    modal.style.display = 'block';
+                };
+            });
+        }
     </script>
     <script>
         document.addEventListener('DOMContentLoaded', async function () {
@@ -273,81 +501,83 @@
             const user_heightInMeters = user_height / 100;
             const targetWeight = targetBMI * (user_heightInMeters ** 2);
             // Weeks to reach target, assuming 4.33 weeks in a month for monthly weight loss conversion to weekly
-            const weeksToTarget = Math.abs(user_weight - targetWeight) / Math.abs(weightChangePerMonth / 4.33);
+            let weeksToTarget = null;
+            if (weightChangePerMonth !== Infinity && weightChangePerMonth !== 0) {
+                const weeksToTarget = Math.abs(user_weight - targetWeight) / Math.abs(weightChangePerMonth / 4.33);
+                // Display BMI message
+                message = `With ${weightChangePerMonth.toFixed(1)} kg/m, it would take approximately ${weeksToTarget.toFixed(1)} weeks to reach a normal BMI.`;
+                // Gradient for text fill
+                const gradient = defs.append("linearGradient")
+                    .attr("id", "gradientText")
+                    .attr("x1", "0%")
+                    .attr("y1", "0%")
+                    .attr("x2", "100%")
+                    .attr("y2", "0%");
 
-            // Message to be displayed
-            const message = `with ${weightChangePerMonth.toFixed(1)} kg/m,it would take approximately ${weeksToTarget.toFixed(1)} weeks to reach a normal BMI.`;
+                gradient.append("stop")
+                    .attr("offset", "0%")
+                    .style("stop-color", "#f60"); // Start color
 
-            // Gradient for text fill
-            const gradient = defs.append("linearGradient")
-                .attr("id", "gradientText")
-                .attr("x1", "0%")
-                .attr("y1", "0%")
-                .attr("x2", "100%")
-                .attr("y2", "0%");
+                gradient.append("stop")
+                    .attr("offset", "100%")
+                    .style("stop-color", "#ff6"); // End color
 
-            gradient.append("stop")
-                .attr("offset", "0%")
-                .style("stop-color", "#f60"); // Start color
+                // Append message text with gradient and shadow
+                const messageText = svg.append("text")
+                    .attr("x", svgWidth / 2)
+                    .attr("y", svgHeight - 30) // Adjust position as needed
+                    .attr("text-anchor", "middle")
+                    .attr("font-size", "16px")
+                    //.style("fill", "url(#gradientText)") // Use gradient
+                    //.style("filter", "url(#dropshadow)") // Apply shadow
+                    .text(message);
 
-            gradient.append("stop")
-                .attr("offset", "100%")
-                .style("stop-color", "#ff6"); // End color
+                // Smooth entrance animation for the message
+                messageText.style("opacity", 0)
+                    .transition()
+                    .duration(2000) // Smooth transition for 2 seconds
+                    .style("opacity", 1);
 
-            // Append message text with gradient and shadow
-            const messageText = svg.append("text")
-                .attr("x", svgWidth / 2)
-                .attr("y", svgHeight - 30) // Adjust position as needed
-                .attr("text-anchor", "middle")
-                .attr("font-size", "16px")
-                //.style("fill", "url(#gradientText)") // Use gradient
-                //.style("filter", "url(#dropshadow)") // Apply shadow
-                .text(message);
+                // Assuming svg, svgWidth, and svgHeight are already defined
 
-            // Smooth entrance animation for the message
-            messageText.style("opacity", 0)
-                .transition()
-                .duration(2000) // Smooth transition for 2 seconds
-                .style("opacity", 1);
+                const circleRadius = 40; // Control the size of the circle
+                const circleColor = "#4CAF50"; // Green color for the circle
+                const fontSizeWeeksToTarget = "32px"; // Font size for weeksToTarget
+                const fontSizeWeeksLabel = "12px"; // Smaller font size for "weeks" label
 
-            // Assuming svg, svgWidth, and svgHeight are already defined
+                // Calculate the position for the circle (you can adjust these as needed)
+                const circleX = svgWidth / 2 - 270; // Center of the SVG width
+                const circleY = svgHeight / 2 - 155; // Positioned above the bottom of the SVG
 
-            const circleRadius = 40; // Control the size of the circle
-            const circleColor = "#4CAF50"; // Green color for the circle
-            const fontSizeWeeksToTarget = "32px"; // Font size for weeksToTarget
-            const fontSizeWeeksLabel = "12px"; // Smaller font size for "weeks" label
+                // Draw the circle
+                svg.append("circle")
+                    .attr("cx", circleX)
+                    .attr("cy", circleY)
+                    .attr("r", circleRadius)
+                    .style("fill", circleColor);
 
-            // Calculate the position for the circle (you can adjust these as needed)
-            const circleX = svgWidth / 2 - 270; // Center of the SVG width
-            const circleY = svgHeight / 2 - 155; // Positioned above the bottom of the SVG
+                // Add the weeksToTarget text
+                svg.append("text")
+                    .attr("x", circleX)
+                    .attr("y", circleY) // Vertically center the text in the circle
+                    .attr("text-anchor", "middle")
+                    .attr("dominant-baseline", "middle") // Ensure the text is centered
+                    .style("fill", "white") // Choose a color that contrasts with the circle
+                    .style("font-size", fontSizeWeeksToTarget)
+                    .text(weeksToTarget.toFixed(1)); // Assuming weeksToTarget is defined
 
-            // Draw the circle
-            svg.append("circle")
-                .attr("cx", circleX)
-                .attr("cy", circleY)
-                .attr("r", circleRadius)
-                .style("fill", circleColor);
-
-            // Add the weeksToTarget text
-            svg.append("text")
-                .attr("x", circleX)
-                .attr("y", circleY) // Vertically center the text in the circle
-                .attr("text-anchor", "middle")
-                .attr("dominant-baseline", "middle") // Ensure the text is centered
-                .style("fill", "white") // Choose a color that contrasts with the circle
-                .style("font-size", fontSizeWeeksToTarget)
-                .text(weeksToTarget.toFixed(1)); // Assuming weeksToTarget is defined
-
-            // Add the "weeks" label below weeksToTarget
-            svg.append("text")
-                .attr("x", circleX)
-                .attr("y", circleY + 20) // Position it right below the weeksToTarget text
-                .attr("text-anchor", "middle")
-                .style("fill", "white") // Ensure readability against the circle's background
-                .style("font-size", fontSizeWeeksLabel)
-                .text("weeks");
-
-
+                // Add the "weeks" label below weeksToTarget
+                svg.append("text")
+                    .attr("x", circleX)
+                    .attr("y", circleY + 20) // Position it right below the weeksToTarget text
+                    .attr("text-anchor", "middle")
+                    .style("fill", "white") // Ensure readability against the circle's background
+                    .style("font-size", fontSizeWeeksLabel)
+                    .text("weeks");
+            } else {
+                weeksToTarget = null;
+                message = 'Not enough data or invalid data to calculate BMI change.';
+            }
 
 
             // Functions for fetching weight, height, calculating BMI, and finding category index
@@ -405,119 +635,6 @@
             fetch('/api/weight_trend')
                 .then(response => response.json())
                 .then(data => {
-                    const dates = data.dates.map(date => new Date(date));
-                    const weights = data.weights.map(weight => parseFloat(weight));
-
-                    // Create table beside the gauge
-                    let tableHtml = "<table class='table'><thead><tr><th>Date</th><th>Weight (kg)</th></tr></thead><tbody>";
-                    data.dates.forEach((date, index) => {
-                        tableHtml = `<tr><td>${data.dates[data.dates.length - 1 - index]}</td><td>${data.weights[data.weights.length - 1 - index]}</td></tr>` + tableHtml;
-                    });
-                    tableHtml += "</tbody></table>";
-                    document.getElementById('weightData').innerHTML = tableHtml;
-
-                    if (dates.length > 1 && weights.length > 1) {
-                        const firstDate = dates[0];
-                        const lastDate = dates[dates.length - 1];
-                        const firstWeight = weights[0];
-                        const lastWeight = weights[weights.length - 1];
-                        const daysBetween = (lastDate - firstDate) / (1000 * 60 * 60 * 24);
-                        const weightChange = lastWeight - firstWeight;
-                        const weightChangePerMonth = (weightChange / daysBetween) * 30;
-                        updateGauge(weightChangePerMonth);
-                    } else {
-                        console.error('Not enough data to calculate weight change per month.');
-                    }
-                })
-                .catch(error => console.error('Error:', error));
-        });
-
-        function updateGauge(weightChangePerMonth) {
-            var gaugeEndColor = weightChangePerMonth < 0 ? 'green' : 'red';
-
-            // Create an array of steps for the gauge, where it's cyan from -10 to 0 and royal blue from 0 to 10.
-            var stepsArray = [
-                { range: [-10, 0], color: 'cyan' },
-                { range: [0, 10], color: 'royalblue' }
-            ];
-
-            // Insert the active step based on the weight change.
-            if (weightChangePerMonth < 0) {
-                // Insert a green step from 0 to the negative value.
-                stepsArray.push({ range: [weightChangePerMonth, 0], color: 'rgba(56, 100, 58, 0.6)' });
-            } else {
-                // Insert a red step from 0 to the positive value.
-                stepsArray.push({ range: [0, weightChangePerMonth], color: 'red' });
-            }
-
-            var gaugeDepth = 10; // Adjust this to change the "depth" of the 3D effect
-            var shadowSteps = [];
-            for (var i = 0; i < gaugeDepth; i++) {
-                shadowSteps.push({
-                    range: [-10 + i, 10 - i],
-                    color: `rgba(200, 200, 200, ${1 - i / gaugeDepth})`,
-                    thickness: 0.01 // This ensures that each step is visible
-                });
-            }
-
-            var data = [
-                {
-                    type: 'indicator',
-                    mode: 'gauge+number',
-                    value: weightChangePerMonth,
-                    number: {
-                        suffix: ' kg/m',
-                        font: {
-                            family: 'Arial, sans-serif',
-                            size: 20,
-                            color: 'green'
-                        }
-                    },
-                    title: {
-                        text: '',
-                        font: {
-                            size: 24,
-                            color: 'blue'
-                        }
-                    },
-                    gauge: {
-                        axis: {
-                            range: [-10, 10],
-                            tickwidth: 1,
-                            tickcolor: 'darkblue',
-                            dtick: 2
-                        },
-                        bar: { color: 'rgba(0,0,0,0)' },
-                        bgcolor: 'white',
-                        borderwidth: 2,
-                        bordercolor: 'gray',
-                        steps: shadowSteps.concat(stepsArray),
-                        threshold: {
-                            line: { color: gaugeEndColor, width: 5 },
-                            thickness: 0.9,
-                            value: weightChangePerMonth
-                        }
-                    }
-                }
-            ];
-
-            var layout = {
-                width: 600,
-                height: 400,
-                margin: { t: 0, r: 25, l: 25, b: 0 },
-                paper_bgcolor: 'white',
-                font: { color: 'darkblue', family: 'Arial' }
-            };
-
-            Plotly.newPlot('gaugeChart', data, layout);
-        }
-    </script>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            fetch('/api/weight_trend')
-                .then(response => response.json())
-                .then(data => {
                     var xValues = data.dates.reverse();
                     var yValues = data.weights.reverse();
                     var maxWeight = Math.max(...yValues) + 5;
@@ -556,13 +673,13 @@
                     var layout = {
                         title: 'Weight Trend',
                         xaxis: { title: 'Date' },
-                        yaxis: {
-                            title: 'Weight (kg)',
-                            range: [Math.min(...yValues) - 5, maxWeight]
-                        }
+                        yaxis: { title: 'Weight (kg)', range: [Math.min(...yValues) - 5, maxWeight] },
+                        autosize: true,  // Automatically resize
+                        responsive: true  // Ensure responsiveness
                     };
 
                     Plotly.newPlot('weightTrendPlot', [trace], layout);
+
                 })
                 .catch(error => console.error('Error fetching weight trend data:', error));
         });
